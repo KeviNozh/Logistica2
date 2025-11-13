@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión - FreeAI</title>
+    <style>
+        /* Estilos CSS integrados */
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        /* Estilos generales para toda la aplicación */
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        /* Estilos para los encabezados */
+        h1, h2, h3 {
+            color: #333;
+            text-align: center;
+        }
+
+        /* Estilos para los enlaces */
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Estilos para los botones */
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px 0;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+
+        .button.secondary {
+            background-color: gray;
+        }
+
+        /* Estilos para los formularios */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="password"],
+        .form-group input[type="number"],
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        /* Estilos para las tablas */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        /* Estilos para el header */
+        .main-header {
+            background-color: #333;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        .main-header .logo a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        /* Estilos para la navegación principal */
+        .main-nav ul {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .main-nav ul li {
+            display: inline;
+            margin-right: 20px;
+        }
+
+        .main-nav ul li a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .main-nav ul li a:hover {
+            text-decoration: underline;
+        }
+
+        /* Estilos para el footer */
+        .main-footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        /* Estilos específicos para el dashboard */
+        #dashboard .kpis-container {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        #dashboard .kpi {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            text-align: center;
+            width: 30%;
+        }
+
+        #dashboard .charts-container {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        #dashboard .chart {
+            width: 45%;
+            text-align: center;
+        }
+
+        #dashboard .chart img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        #dashboard .alerts-container {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+        }
+
+        #dashboard .alerts-container ul {
+            padding: 0;
+            list-style: none;
+        }
+
+        #dashboard .alerts-container li {
+            margin-bottom: 5px;
+        }
+
+        #dashboard .alerts-container .alert-icon {
+            color: red;
+            margin-right: 5px;
+        }
+
+        /* Estilos específicos para la lista de vehículos */
+        #lista-vehiculos .filters-container {
+            margin-bottom: 20px;
+        }
+
+        #lista-vehiculos .filters-container input[type="text"],
+        #lista-vehiculos .filters-container select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        #lista-vehiculos .pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #lista-vehiculos .pagination a {
+            display: inline-block;
+            padding: 5px 10px;
+            margin: 0 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #333;
+        }
+
+        #lista-vehiculos .pagination a.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        /* Estilos responsivos */
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+            }
+
+            .main-header {
+                padding: 5px 0;
+                text-align: left;
+            }
+
+            .main-header .logo {
+                float: none;
+                text-align: center;
+            }
+
+            .main-nav {
+                clear: both;
+            }
+
+            .main-nav ul {
+                text-align: center;
+            }
+
+            .main-nav ul li {
+                display: block;
+                margin: 5px 0;
+            }
+
+            #dashboard .kpis-container,
+            #dashboard .charts-container {
+                flex-direction: column;
+            }
+
+            #dashboard .kpi,
+            #dashboard .chart {
+                width: 95%;
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="logo">
+            <a href="dashboard.html">FreeAI - Sistema de Gestión</a>
+        </div>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="#">Rutas</a></li>
+                <li><a href="#">Vehículos</a></li>
+                <li><a href="#">Despachos</a></li>
+                <li><a href="#">Reportes</a></li>
+                <li><a href="configuracion.html">Configuración</a></li>
+                <li><a href="login.html">Cerrar Sesión</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+      <!-- Contenido principal de cada vista irá aquí -->
+      <!-- Ejemplo: dashboard.html -->
+      <section id="dashboard">
+          <h1>Dashboard Principal</h1>
+
+          <div class="kpis-container">
+              <div class="kpi">
+                  <h3>Total Despachos</h3>
+                  <p>1234</p>
+              </div>
+              <div class="kpi">
+                  <h3>Seguros a Vencer</h3>
+                  <p>12</p>
+              </div>
+              <div class="kpi">
+                  <h3>Flota sin Cobertura</h3>
+                  <p>3</p>
+              </div>
+          </div>
+
+          <div class="charts-container">
+              <div class="chart">
+                  <h3>Despachos Mensuales</h3>
+                  <!-- Aquí iría tu gráfico (ej. con Chart.js) -->
+                  <img src="placeholder-grafico.png" alt="Gráfico de Despachos Mensuales">
+              </div>
+              <div class="chart">
+                  <h3>Costos de Seguros</h3>
+                  <!-- Aquí iría tu gráfico -->
+                  <img src="placeholder-grafico.png" alt="Gráfico de Costos de Seguros">
+              </div>
+          </div>
+
+          <div class="alerts-container">
+              <h3>Alertas</h3>
+              <ul>
+                  <li><span class="alert-icon">⚠️</span> Seguro del vehículo ABC-123 vence en 7 días</li>
+                  <li><span class="alert-icon">⚠️</span> Seguro del vehículo XYZ-456 vencido</li>
+              </ul>
+          </div>
+      </section>
+
+      <!-- Ejemplo: lista-vehiculos.html -->
+      <section id="lista-vehiculos" style="display:none;">
+          <h1>Gestión de Vehículos</h1>
+
+          <div class="filters-container">
+              <input type="text" placeholder="Buscar vehículo...">
+              <select>
+                  <option value="">Tipo</option>
+                  <option value="camion">Camión</option>
+                  <option value="furgoneta">Furgoneta</option>
+              </select>
+              <button>Filtrar</button>
+          </div>
+
+          <a href="formulario-vehiculo.html" class="button">Crear Nuevo Vehículo</a>
+
+          <table>
+              <thead>
+                  <tr>
+                      <th>ID</th>
+                      <th>Patente</th>
+                      <th>Tipo</th>
+                      <th>Estado</th>
+                      <th>Acciones</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <tr>
+                      <td>1</td>
+                      <td>ABC-123</td>
+                      <td>Camión</td>
+                      <td>Activo</td>
+                      <td>
+                          <a href="detalle-vehiculo.html">Ver</a>
+                          <a href="formulario-vehiculo.html">Editar</a>
+                          <button>Eliminar</button>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>2</td>
+                      <td>XYZ-456</td>
+                      <td>Furgoneta</td>
+                      <td>Inactivo</td>
+                      <td>
+                          <a href="detalle-vehiculo.html">Ver</a>
+                          <a href="formulario-vehiculo.html">Editar</a>
+                          <button>Eliminar</button>
+                      </td>
+                  </tr>
+                  <!-- Más filas de vehículos -->
+              </tbody>
+          </table>
+
+          <div class="pagination">
+              <a href="#">Anterior</a>
+              <a href="#" class="active">1</a>
+              <a href="#">2</a>
+              <a href="#">3</a>
+              <a href="#">Siguiente</a>
+          </div>
+      </section>
+
+        <!-- Ejemplo: formulario-vehiculo.html -->
+        <section id="formulario-vehiculo" style="display:none;">
+            <h1>Crear/Editar Vehículo</h1>
+            <form>
+                <div class="form-group">
+                    <label for="patente">Patente:</label>
+                    <input type="text" id="patente" name="patente" required>
+                </div>
+                <div class="form-group">
+                    <label for="tipo">Tipo:</label>
+                    <select id="tipo" name="tipo">
+                        <option value="camion">Camión</option>
+                        <option value="furgoneta">Furgoneta</option>
+                        <option value="auto">Auto</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="capacidad">Capacidad (toneladas):</label>
+                    <input type="number" id="capacidad" name="capacidad" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="estado">Estado:</label>
+                    <select id="estado" name="estado">
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
+                        <option value="en_reparacion">En Reparación</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="button">Guardar</button>
+                <a href="lista-vehiculos.html" class="button secondary">Cancelar</a>
+            </form>
+        </section>
+
+          <!-- Ejemplo: Login.html -->
+          <section id="login" style="display:none;">
+              <h1>Iniciar Sesión</h1>
+              <form>
+                  <div class="form-group">
+                      <label for="usuario">Usuario:</label>
+                      <input type="text" id="usuario" name="usuario" required>
+                  </div>
+                  <div class="form-group">
+                      <label for="password">Contraseña:</label>
+                      <input type="password" id="password" name="password" required>
+                  </div>
+                  <button type="submit" class="button">Iniciar Sesión</button>
+                  <a href="recuperar-password.html">¿Olvidaste tu contraseña?</a>
+                  <a href="registro.html">Registrarse</a>
+              </form>
+          </section>
+
+          <!-- Ejemplo: Configuracion.html -->
+          <section id="configuracion" style="display:none;">
+              <h1>Configuración del Sistema</h1>
+              <form>
+                  <div class="form-group">
+                      <label for="tarifa_base">Tarifa Base:</label>
+                      <input type="number" id="tarifa_base" name="tarifa_base" step="0.01" required>
+                  </div>
+                  <div class="form-group">
+                      <label for="usuarios">Gestionar Usuarios:</label>
+                      <button id="usuarios" name="usuarios">Ir a gestion de usuarios</button>
+                  </div>
+                  <button type="submit" class="button">Guardar Cambios</button>
+              </form>
+          </section>
+    </main>
+
+    <footer class="main-footer">
+        <p>&copy; 2025 FreeAI. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        // script.js
+        document.addEventListener('DOMContentLoaded', function() {
+            // Obtener el hash de la URL para mostrar/ocultar secciones
+            let hash = window.location.hash.substring(1); // Elimina el '#'
+            if (hash) {
+                mostrarSeccion(hash);
+            } else {
+                mostrarSeccion('dashboard'); // Muestra el dashboard por defecto
+            }
+
+            // Función para mostrar una sección y ocultar las demás
+            function mostrarSeccion(idSeccion) {
+                let secciones = document.querySelectorAll('main > section');
+                secciones.forEach(seccion => {
+                    seccion.style.display = 'none';
+                });
+
+                let seccionAMostrar = document.getElementById(idSeccion);
+                if (seccionAMostrar) {
+                    seccionAMostrar.style.display = 'block';
+                }
+            }
+
+            // Ejemplo de cómo podrías manejar los enlaces de navegación para mostrar diferentes secciones
+            let enlacesNav = document.querySelectorAll('.main-nav a');
+            enlacesNav.forEach(enlace => {
+                enlace.addEventListener('click', function(evento) {
+                    evento.preventDefault(); // Evita que el enlace navegue
+                    let idSeccion = this.getAttribute('href').split('.')[0]; // Obtiene el nombre del archivo sin la extensión
+                    mostrarSeccion(idSeccion);
+
+                    // Actualiza el hash en la URL
+                    window.location.hash = idSeccion;
+                });
+            });
+
+            // Ejemplo de validación de formulario básica (puedes usar librerías para validaciones más complejas)
+            let formularioVehiculo = document.querySelector('#formulario-vehiculo form');
+            if (formularioVehiculo) {
+                formularioVehiculo.addEventListener('submit', function(evento) {
+                    let patente = document.getElementById('patente').value;
+                    if (!patente) {
+                        alert('La patente es obligatoria.');
+                        evento.preventDefault(); // Evita que el formulario se envíe
+                    }
+                    // Añade más validaciones aquí...
+                });
+            }
+        });
+    </script>
+</body>
+</html>
