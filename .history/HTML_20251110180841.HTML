@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión Logística</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #2ecc71;
+            --warning: #f39c12;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-left: 20px;
+        }
+        
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        nav ul li a:hover, nav ul li a.active {
+            background-color: var(--secondary);
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .sidebar {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 20px;
+        }
+        
+        .sidebar h3 {
+            margin-bottom: 15px;
+            color: var(--primary);
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .sidebar ul {
+            list-style: none;
+        }
+        
+        .sidebar ul li {
+            margin-bottom: 10px;
+        }
+        
+        .sidebar ul li a {
+            display: block;
+            padding: 8px 12px;
+            text-decoration: none;
+            color: #555;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar ul li a:hover, .sidebar ul li a.active {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .main-content {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 20px;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .page-header h2 {
+            color: var(--primary);
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: var(--accent);
+            color: white;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .status-inactive {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--secondary);
+            outline: none;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .card-title {
+            color: var(--primary);
+            font-size: 18px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            color: #777;
+            font-size: 14px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-title {
+            color: var(--primary);
+            font-size: 20px;
+        }
+        
+        .close {
+            font-size: 24px;
+            cursor: pointer;
+            color: #777;
+        }
+        
+        .close:hover {
+            color: #333;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .edit-btn {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .delete-btn {
+            background-color: var(--accent);
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                display: none;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">LOGÍSTICA NUTA</div>
+            <nav>
+                <ul>
+                    <li><a href="#" class="active">Dashboard</a></li>
+                    <li><a href="#">Despachos</a></li>
+                    <li><a href="#">Reportes</a></li>
+                    <li><a href="#">Configuración</a></li>
+                    <li><a href="#">Cerrar Sesión</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="dashboard">
+            <div class="sidebar">
+                <h3>Gestión</h3>
+                <ul>
+                    <li><a href="#" class="active">Dashboard</a></li>
+                    <li><a href="#">Rutas</a></li>
+                    <li><a href="#">Vehículos</a></li>
+                    <li><a href="#">Aeronaves</a></li>
+                    <li><a href="#">Conductores</a></li>
+                    <li><a href="#">Pilotos</a></li>
+                    <li><a href="#">Despachos</a></li>
+                    <li><a href="#">Clientes</a></li>
+                    <li><a href="#">Cargas</a></li>
+                </ul>
+            </div>
+            
+            <div class="main-content">
+                <div class="page-header">
+                    <h2>Gestión de Clientes</h2>
+                    <button class="btn btn-primary" onclick="openModal('clientModal')">Nuevo Cliente</button>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Clientes</div>
+                        <div class="stat-value">42</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Clientes Activos</div>
+                        <div class="stat-value">38</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Envíos este Mes</div>
+                        <div class="stat-value">127</div>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>RUT</th>
+                                <th>Teléfono</th>
+                                <th>Email</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1001</td>
+                                <td>Importadora Andina S.A.</td>
+                                <td>76.123.456-7</td>
+                                <td>+56 2 2345 6789</td>
+                                <td>contacto@andina.cl</td>
+                                <td><span class="status status-active">Activo</span></td>
+                                <td class="actions">
+                                    <button class="action-btn edit-btn">Editar</button>
+                                    <button class="action-btn delete-btn">Eliminar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>1002</td>
+                                <td>Exportadora del Pacífico</td>
+                                <td>76.234.567-8</td>
+                                <td>+56 2 3456 7890</td>
+                                <td>info@pacifico.cl</td>
+                                <td><span class="status status-active">Activo</span></td>
+                                <td class="actions">
+                                    <button class="action-btn edit-btn">Editar</button>
+                                    <button class="action-btn delete-btn">Eliminar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>1003</td>
+                                <td>Distribuidora Central Ltda.</td>
+                                <td>76.345.678-9</td>
+                                <td>+56 2 4567 8901</td>
+                                <td>ventas@centraldist.com</td>
+                                <td><span class="status status-inactive">Inactivo</span></td>
+                                <td class="actions">
+                                    <button class="action-btn edit-btn">Editar</button>
+                                    <button class="action-btn delete-btn">Eliminar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="page-header" style="margin-top: 40px;">
+                    <h2>Gestión de Cargas</h2>
+                    <button class="btn btn-primary" onclick="openModal('cargoModal')">Nueva Carga</button>
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Descripción</th>
+                                <th>Tipo</th>
+                                <th>Peso (kg)</th>
+                                <th>Valor (CLP)</th>
+                                <th>Cliente</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>5001</td>
+                                <td>Electrodomésticos línea blanca</td>
+                                <td>Electrónicos</td>
+                                <td>850.5</td>
+                                <td>$4.250.000</td>
+                                <td>Importadora Andina S.A.</td>
+                                <td class="actions">
+                                    <button class="action-btn edit-btn">Editar</button>
+                                    <button class="action-btn delete-btn">Eliminar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>5002</td>
+                                <td>Fruta de exportación (uvas)</td>
+                                <td>Alimentos</td>
+                                <td>1200.0</td>
+                                <td>$8.750.000</td>
+                                <td>Exportadora del Pacífico</td>
+                                <td class="actions">
+                                    <button class="action-btn edit-btn">Editar</button>
+                                    <button class="action-btn delete-btn">Eliminar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>5003</td>
+                                <td>Repuestos automotrices</td>
+                                <td>Automotriz</td>
+                                <td>350.0</td>
+                                <td>$2.100.000</td>
+                                <td>Distribuidora Central Ltda.</td>
+                                <td class="actions">
+                                    <button class="action-btn edit-btn">Editar</button>
+                                    <button class="action-btn delete-btn">Eliminar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para Cliente -->
+    <div id="clientModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Nuevo Cliente</h3>
+                <span class="close" onclick="closeModal('clientModal')">&times;</span>
+            </div>
+            <form id="clientForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="clientName">Nombre</label>
+                        <input type="text" id="clientName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="clientRut">RUT</label>
+                        <input type="text" id="clientRut" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="clientAddress">Dirección</label>
+                    <input type="text" id="clientAddress" class="form-control" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="clientPhone">Teléfono</label>
+                        <input type="text" id="clientPhone" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="clientEmail">Email</label>
+                        <input type="email" id="clientEmail" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="clientStatus">Estado</label>
+                    <select id="clientStatus" class="form-control">
+                        <option value="active">Activo</option>
+                        <option value="inactive">Inactivo</option>
+                    </select>
+                </div>
+                <div style="text-align: right; margin-top: 20px;">
+                    <button type="button" class="btn" onclick="closeModal('clientModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Cliente</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal para Carga -->
+    <div id="cargoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Nueva Carga</h3>
+                <span class="close" onclick="closeModal('cargoModal')">&times;</span>
+            </div>
+            <form id="cargoForm">
+                <div class="form-group">
+                    <label for="cargoDescription">Descripción</label>
+                    <input type="text" id="cargoDescription" class="form-control" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cargoType">Tipo de Carga</label>
+                        <select id="cargoType" class="form-control">
+                            <option value="electronics">Electrónicos</option>
+                            <option value="food">Alimentos</option>
+                            <option value="automotive">Automotriz</option>
+                            <option value="textile">Textil</option>
+                            <option value="chemical">Químicos</option>
+                            <option value="other">Otros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="cargoWeight">Peso (kg)</label>
+                        <input type="number" id="cargoWeight" class="form-control" step="0.1" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cargoValue">Valor (CLP)</label>
+                        <input type="number" id="cargoValue" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cargoClient">Cliente</label>
+                        <select id="cargoClient" class="form-control">
+                            <option value="1001">Importadora Andina S.A.</option>
+                            <option value="1002">Exportadora del Pacífico</option>
+                            <option value="1003">Distribuidora Central Ltda.</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="text-align: right; margin-top: 20px;">
+                    <button type="button" class="btn" onclick="closeModal('cargoModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Carga</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        // Cerrar modal al hacer clic fuera del contenido
+        window.onclick = function(event) {
+            const modals = document.getElementsByClassName('modal');
+            for (let i = 0; i < modals.length; i++) {
+                if (event.target == modals[i]) {
+                    modals[i].style.display = 'none';
+                }
+            }
+        }
+        
+        // Manejar envío de formularios
+        document.getElementById('clientForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Cliente guardado exitosamente');
+            closeModal('clientModal');
+            // Aquí iría la lógica para guardar el cliente
+        });
+        
+        document.getElementById('cargoForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Carga guardada exitosamente');
+            closeModal('cargoModal');
+            // Aquí iría la lógica para guardar la carga
+        });
+    </script>
+</body>
+</html>
