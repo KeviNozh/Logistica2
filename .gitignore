@@ -1,2 +1,6 @@
 *
 !/.gitignore
+!/manage.py
+!/logistica/
+!/transporte/
+!/.history/
