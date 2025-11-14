@@ -318,24 +318,39 @@
             color: var(--success);
         }
 
-        .badge.pending {
+        .badge.vacations {
             background: rgba(245, 158, 11, 0.2);
-            color: var(--accent);
+            color: var(--warning);
         }
 
-        .badge.alert {
+        .badge.license {
             background: rgba(239, 68, 68, 0.2);
             color: var(--danger);
         }
 
-        .badge.warning {
-            background: rgba(245, 158, 11, 0.2);
-            color: var(--warning);
+        .badge.inactive {
+            background: rgba(148, 163, 184, 0.2);
+            color: var(--text-secondary);
         }
 
         .badge.info {
             background: rgba(59, 130, 246, 0.2);
             color: var(--info);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .error {
+            text-align: center;
+            padding: 2rem;
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 12px;
+            margin: 1rem 0;
         }
 
         .pagination {
@@ -388,6 +403,17 @@
 
         .action-btn:hover {
             background: var(--primary);
+            color: white;
+        }
+
+        .action-btn.delete {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        .action-btn.delete:hover {
+            background: var(--danger);
             color: white;
         }
 
@@ -500,35 +526,29 @@
 </head>
 <body>
     <div class="bg-animation">
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
     </div>
 
     <div class="container">
-        <!-- Header -->
         <div class="header">
-            <div class="logo" onclick="goToDashboard()">
+            <div class="logo">
                 <div class="logo-icon">🚚</div>
                 <span>Logística Global</span>
             </div>
             <div class="user-info">
                 <div>
-                    <div style="font-weight: 600;">Admin Usuario</div>
-                    <div style="font-size: 0.85rem; color: var(--text-secondary);">Administrador del Sistema</div>
+                    <div style="font-weight: 600;">{{ user.get_full_name|default:user.username }}</div>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                        {% if user.is_staff %}Administrador{% else %}Usuario{% endif %}
+                    </div>
                 </div>
-                <div class="avatar">AU</div>
+                <div class="avatar" onclick="window.location.href='{% url 'logout' %}'">
+                    {{ user.username|slice:":2"|upper }}
+                </div>
             </div>
         </div>
 
-        <!-- Navigation Menu -->
         <div class="nav-menu">
             <div class="nav-item" onclick="window.location.href='{% url 'dashboard' %}'">📊 Dashboard</div>
             <div class="nav-item" onclick="window.location.href='{% url 'despachos' %}'">📦 Despachos</div>
@@ -544,226 +564,84 @@
             <div class="nav-item" onclick="window.location.href='{% url 'api' %}'">🔗 API</div>
         </div>
 
-        <!-- Page Title -->
         <div class="page-title">
             <span>👨‍💼</span>
             <span>Gestión de Conductores</span>
         </div>
 
-        <!-- Filters and Search -->
         <div class="filters">
             <div class="filter-group">
-                <select class="filter-select">
+                <select class="filter-select" id="filter-status">
                     <option value="">Todos los estados</option>
-                    <option value="activo">Activo</option>
-                    <option value="vacaciones">Vacaciones</option>
-                    <option value="licencia">Licencia</option>
-                    <option value="inactivo">Inactivo</option>
-                </select>
-                <select class="filter-select">
-                    <option value="">Todos los tipos</option>
-                    <option value="camion">Camión</option>
-                    <option value="furgon">Furgón</option>
-                    <option value="van">Van</option>
+                    <option value="active">Activo</option>
+                    <option value="inactive">Inactivo</option>
                 </select>
             </div>
-            <input type="text" class="search-input" placeholder="Buscar conductor...">
-            <button class="btn" onclick="showNewConductorModal()">➕ Nuevo Conductor</button>
+            <input type="text" class="search-input" id="search-input" placeholder="Buscar conductor...">
+            <button class="btn" id="new-conductor-btn">➕ Nuevo Conductor</button>
         </div>
 
-        <!-- Table -->
         <div class="table-container">
             <div class="table-header">
                 <div class="table-title">Lista de Conductores</div>
-                <div style="color: var(--text-secondary); font-size: 0.9rem;">Total: 38 conductores</div>
+                <div id="conductor-count" style="color: var(--text-secondary); font-size: 0.9rem;">Cargando...</div>
             </div>
             <table class="table">
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>Nombre</th>
+                        <th>RUT</th>
                         <th>Licencia</th>
-                        <th>Vehículo Asignado</th>
                         <th>Teléfono</th>
+                        <th>Email</th>
                         <th>Estado</th>
-                        <th>Vence Licencia</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="conductores-table-body">
                     <tr>
-                        <td>C-001</td>
-                        <td>Carlos López</td>
-                        <td>A1-A3</td>
-                        <td>ABC-123</td>
-                        <td>+56 9 1234 5678</td>
-                        <td><span class="badge active">Activo</span></td>
-                        <td>15/06/2024</td>
-                        <td>
-                            <button class="action-btn" onclick="viewConductor('C-001')">Ver</button>
-                            <button class="action-btn" onclick="editConductor('C-001')">Editar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>C-002</td>
-                        <td>Ana Martínez</td>
-                        <td>B</td>
-                        <td>DEF-456</td>
-                        <td>+56 9 2345 6789</td>
-                        <td><span class="badge active">Activo</span></td>
-                        <td>20/07/2024</td>
-                        <td>
-                            <button class="action-btn" onclick="viewConductor('C-002')">Ver</button>
-                            <button class="action-btn" onclick="editConductor('C-002')">Editar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>C-003</td>
-                        <td>Pedro González</td>
-                        <td>A1-A3</td>
-                        <td>GHI-789</td>
-                        <td>+56 9 3456 7890</td>
-                        <td><span class="badge warning">Vacaciones</span></td>
-                        <td>10/05/2024</td>
-                        <td>
-                            <button class="action-btn" onclick="viewConductor('C-003')">Ver</button>
-                            <button class="action-btn" onclick="editConductor('C-003')">Editar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>C-004</td>
-                        <td>Miguel Ángel</td>
-                        <td>A1-A3</td>
-                        <td>JKL-012</td>
-                        <td>+56 9 4567 8901</td>
-                        <td><span class="badge alert">Licencia</span></td>
-                        <td>25/12/2023</td>
-                        <td>
-                            <button class="action-btn" onclick="viewConductor('C-004')">Ver</button>
-                            <button class="action-btn" onclick="editConductor('C-004')">Editar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>C-005</td>
-                        <td>Laura Silva</td>
-                        <td>B</td>
-                        <td>MNO-345</td>
-                        <td>+56 9 5678 9012</td>
-                        <td><span class="badge active">Activo</span></td>
-                        <td>30/08/2024</td>
-                        <td>
-                            <button class="action-btn" onclick="viewConductor('C-005')">Ver</button>
-                            <button class="action-btn" onclick="editConductor('C-005')">Editar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>C-006</td>
-                        <td>Roberto Díaz</td>
-                        <td>A1-A3</td>
-                        <td>PQR-678</td>
-                        <td>+56 9 6789 0123</td>
-                        <td><span class="badge active">Activo</span></td>
-                        <td>15/09/2024</td>
-                        <td>
-                            <button class="action-btn" onclick="viewConductor('C-006')">Ver</button>
-                            <button class="action-btn" onclick="editConductor('C-006')">Editar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>C-007</td>
-                        <td>María José Rojas</td>
-                        <td>B</td>
-                        <td>STU-901</td>
-                        <td>+56 9 7890 1234</td>
-                        <td><span class="badge warning">Vacaciones</span></td>
-                        <td>20/10/2024</td>
-                        <td>
-                            <button class="action-btn" onclick="viewConductor('C-007')">Ver</button>
-                            <button class="action-btn" onclick="editConductor('C-007')">Editar</button>
-                        </td>
+                        <td colspan="8" class="loading">Cargando datos de conductores desde la base de datos...</td>
                     </tr>
                 </tbody>
             </table>
-            <div class="pagination">
-                <div class="pagination-info">Mostrando 1-7 de 38 conductores</div>
-                <div class="pagination-controls">
-                    <button class="pagination-btn">Anterior</button>
-                    <button class="pagination-btn active">1</button>
-                    <button class="pagination-btn">2</button>
-                    <button class="pagination-btn">3</button>
-                    <button class="pagination-btn">4</button>
-                    <button class="pagination-btn">5</button>
-                    <button class="pagination-btn">Siguiente</button>
-                </div>
-            </div>
         </div>
     </div>
 
-    <!-- Modal for New Conductor -->
+    <!-- Modal para nuevo conductor -->
     <div id="newConductorModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal('newConductorModal')">&times;</span>
             <h3>Nuevo Conductor</h3>
             <form id="newConductorForm">
+                <div class="form-group">
+                    <label class="form-label">Nombre *</label>
+                    <input type="text" class="form-input" name="nombre" required>
+                </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">Nombre</label>
-                        <input type="text" class="form-input" required>
+                        <label class="form-label">RUT *</label>
+                        <input type="text" class="form-input" name="rut" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Apellido</label>
-                        <input type="text" class="form-input" required>
+                        <label class="form-label">Licencia *</label>
+                        <input type="text" class="form-input" name="licencia" required>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">Licencia</label>
-                        <select class="form-select" required>
-                            <option value="">Seleccionar licencia</option>
-                            <option value="A1-A3">A1-A3</option>
-                            <option value="B">B</option>
-                            <option value="C">C</option>
-                            <option value="D">D</option>
-                        </select>
+                        <label class="form-label">Teléfono *</label>
+                        <input type="tel" class="form-input" name="telefono" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Vence Licencia</label>
-                        <input type="date" class="form-input" required>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Teléfono</label>
-                        <input type="tel" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Email</label>
-                        <input type="email" class="form-input" required>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Estado</label>
-                        <select class="form-select" required>
-                            <option value="activo">Activo</option>
-                            <option value="vacaciones">Vacaciones</option>
-                            <option value="licencia">Licencia</option>
-                            <option value="inactivo">Inactivo</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Vehículo Asignado</label>
-                        <select class="form-select">
-                            <option value="">Sin asignar</option>
-                            <option value="ABC-123">ABC-123</option>
-                            <option value="DEF-456">DEF-456</option>
-                            <option value="GHI-789">GHI-789</option>
-                        </select>
+                        <label class="form-label">Email *</label>
+                        <input type="email" class="form-input" name="email" required>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Dirección</label>
-                    <textarea class="form-input" rows="3"></textarea>
+                    <label class="form-label">
+                        <input type="checkbox" name="activo" checked> Activo
+                    </label>
                 </div>
                 <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('newConductorModal')">Cancelar</button>
@@ -773,24 +651,208 @@
         </div>
     </div>
 
-    <!-- Modal for View Conductor -->
-    <div id="viewConductorModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal('viewConductorModal')">&times;</span>
-            <h3 id="viewConductorTitle">Detalles del Conductor</h3>
-            <div id="viewConductorContent"></div>
-        </div>
-    </div>
-
     <script>
-        // Navigation Functions
-        function goToDashboard() {
-            window.location.href = 'dashboard.html';
+        let conductoresData = [];
+
+        // Función para cargar conductores desde la base de datos
+        async function loadConductoresFromDatabase() {
+            try {
+                showLoadingState();
+                
+                const response = await fetch('/api/conductores/');
+                
+                if (!response.ok) {
+                    throw new Error('Error al cargar los conductores');
+                }
+                
+                conductoresData = await response.json();
+                renderConductoresTable(conductoresData);
+                showNotification('Datos de conductores cargados correctamente');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showErrorState('Error al cargar los conductores: ' + error.message);
+            }
         }
 
-        function goToPage(page) {
-            // Redirección real a la página
-            window.location.href = page;
+        function showLoadingState() {
+            const tableBody = document.getElementById('conductores-table-body');
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="loading">Cargando datos de conductores desde la base de datos...</td>
+                </tr>
+            `;
+            document.getElementById('conductor-count').textContent = 'Cargando...';
+        }
+
+        function showErrorState(message) {
+            const tableBody = document.getElementById('conductores-table-body');
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="8">
+                        <div class="error">
+                            ${message}
+                            <br>
+                            <button class="btn" onclick="loadConductoresFromDatabase()" style="margin-top: 1rem;">
+                                Reintentar
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            document.getElementById('conductor-count').textContent = 'Error';
+        }
+
+        // Función para renderizar la tabla de conductores
+        function renderConductoresTable(conductores) {
+            const tableBody = document.getElementById('conductores-table-body');
+            const conductorCount = document.getElementById('conductor-count');
+            
+            if (conductores.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="loading">No se encontraron conductores en la base de datos</td>
+                    </tr>
+                `;
+                conductorCount.textContent = 'Total: 0 conductores';
+                return;
+            }
+            
+            tableBody.innerHTML = '';
+            conductorCount.textContent = `Total: ${conductores.length} conductores`;
+            
+            conductores.forEach(conductor => {
+                const row = document.createElement('tr');
+                
+                // Estado basado en el campo 'activo'
+                const statusClass = conductor.activo ? 'active' : 'inactive';
+                const statusText = conductor.activo ? 'Activo' : 'Inactivo';
+                
+                row.innerHTML = `
+                    <td>${conductor.id}</td>
+                    <td>${conductor.nombre || 'N/A'}</td>
+                    <td>${conductor.rut || 'N/A'}</td>
+                    <td>${conductor.licencia || 'N/A'}</td>
+                    <td>${conductor.telefono || 'N/A'}</td>
+                    <td>${conductor.email || 'N/A'}</td>
+                    <td><span class="badge ${statusClass}">${statusText}</span></td>
+                    <td>
+                        <button class="action-btn" onclick="viewConductor(${conductor.id})">Ver</button>
+                        <button class="action-btn" onclick="editConductor(${conductor.id})">Editar</button>
+                        <button class="action-btn delete" onclick="deleteConductor(${conductor.id})">Eliminar</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Función para filtrar conductores
+        function filterConductores() {
+            const statusFilter = document.getElementById('filter-status').value;
+            const searchText = document.getElementById('search-input').value.toLowerCase();
+            
+            const filteredConductores = conductoresData.filter(conductor => {
+                const matchesStatus = !statusFilter || 
+                    (statusFilter === 'active' && conductor.activo) ||
+                    (statusFilter === 'inactive' && !conductor.activo);
+                
+                const matchesSearch = !searchText || 
+                    (conductor.nombre && conductor.nombre.toLowerCase().includes(searchText)) ||
+                    (conductor.rut && conductor.rut.toLowerCase().includes(searchText)) ||
+                    (conductor.licencia && conductor.licencia.toLowerCase().includes(searchText)) ||
+                    (conductor.email && conductor.email.toLowerCase().includes(searchText));
+                
+                return matchesStatus && matchesSearch;
+            });
+            
+            renderConductoresTable(filteredConductores);
+        }
+
+        // Funciones de acción para los conductores
+        async function viewConductor(conductorId) {
+            try {
+                const response = await fetch(`/api/conductores/${conductorId}/`);
+                const conductorDetails = await response.json();
+                
+                showNotification(`Viendo detalles del conductor ${conductorId}`);
+                console.log('Detalles del conductor:', conductorDetails);
+                
+            } catch (error) {
+                console.error('Error al obtener detalles:', error);
+                showNotification('Error al cargar detalles del conductor');
+            }
+        }
+
+        async function editConductor(conductorId) {
+            showNotification(`Editando el conductor ${conductorId}`);
+            // window.location.href = `/conductores/${conductorId}/editar/`;
+        }
+
+        async function deleteConductor(conductorId) {
+            if (confirm('¿Está seguro de que desea eliminar este conductor?')) {
+                try {
+                    const response = await fetch(`/api/conductores/${conductorId}/`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCSRFToken()
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        await loadConductoresFromDatabase();
+                        showNotification('Conductor eliminado correctamente');
+                    } else {
+                        throw new Error('Error al eliminar el conductor');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showNotification('Error al eliminar el conductor');
+                }
+            }
+        }
+
+        // Función para crear nuevo conductor
+        async function createConductor(conductorData) {
+            try {
+                // Preparar los datos para la API
+                const apiData = {
+                    nombre: conductorData.nombre,
+                    rut: conductorData.rut,
+                    licencia: conductorData.licencia,
+                    telefono: conductorData.telefono,
+                    email: conductorData.email,
+                    activo: conductorData.activo
+                };
+
+                console.log('Enviando datos a la API:', apiData);
+
+                const response = await fetch('/api/conductores/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken()
+                    },
+                    body: JSON.stringify(apiData)
+                });
+
+                if (response.ok) {
+                    const newConductor = await response.json();
+                    showNotification('✓ Conductor creado exitosamente');
+                    closeModal('newConductorModal');
+                    document.getElementById('newConductorForm').reset();
+                    await loadConductoresFromDatabase();
+                    return newConductor;
+                } else {
+                    const errorData = await response.json();
+                    console.error('Error del servidor:', errorData);
+                    throw new Error(errorData.detail || JSON.stringify(errorData) || 'Error al crear el conductor');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('✗ Error al crear el conductor: ' + error.message);
+            }
         }
 
         // Modal Functions
@@ -806,62 +868,27 @@
             showModal('newConductorModal');
         }
 
-        // View Conductor Details
-        function viewConductor(conductorId) {
-            const content = `
-                <div style="line-height: 1.6;">
-                    <p><strong>ID:</strong> ${conductorId}</p>
-                    <p><strong>Nombre:</strong> Carlos López</p>
-                    <p><strong>Licencia:</strong> A1-A3</p>
-                    <p><strong>Vence Licencia:</strong> 15/06/2024</p>
-                    <p><strong>Teléfono:</strong> +56 9 1234 5678</p>
-                    <p><strong>Email:</strong> carlos.lopez@empresa.com</p>
-                    <p><strong>Dirección:</strong> Av. Principal 123, Santiago</p>
-                    <p><strong>Vehículo Asignado:</strong> ABC-123 (Volvo FH16)</p>
-                    <p><strong>Estado:</strong> <span class="badge active">Activo</span></p>
-                    <div style="margin-top: 1.5rem;">
-                        <h4>Estadísticas</h4>
-                        <ul style="margin-top: 0.5rem;">
-                            <li>Despachos este mes: 12</li>
-                            <li>Kilómetros recorridos: 4,250 km</li>
-                            <li>Calificación promedio: 4.8/5</li>
-                            <li>Incidentes: 0</li>
-                            <li>Horas de conducción: 145 hrs</li>
-                        </ul>
-                    </div>
-                    <div style="margin-top: 1.5rem;">
-                        <h4>Certificaciones</h4>
-                        <ul style="margin-top: 0.5rem;">
-                            <li>Manejo Defensivo - Vence: 15/03/2024</li>
-                            <li>Primeros Auxilios - Vence: 20/05/2024</li>
-                            <li>Manejo de Carga Peligrosa - Vence: 10/11/2024</li>
-                        </ul>
-                    </div>
-                </div>
-            `;
-            document.getElementById('viewConductorTitle').textContent = `Conductor ${conductorId}`;
-            document.getElementById('viewConductorContent').innerHTML = content;
-            showModal('viewConductorModal');
+        // Función auxiliar para obtener el token CSRF
+        function getCSRFToken() {
+            const name = 'csrftoken';
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
         }
-
-        // Edit Conductor
-        function editConductor(conductorId) {
-            showNotification(`Editando conductor ${conductorId}...`);
-            // In a real application, this would load the edit form with existing data
-        }
-
-        // Form Submission
-        document.getElementById('newConductorForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            showNotification('Conductor creado exitosamente');
-            closeModal('newConductorModal');
-            // In a real application, this would submit the form data to the server
-        });
 
         // Notification System
         function showNotification(message) {
             const notification = document.createElement('div');
-            notification.textContent = `✓ ${message}`;
+            notification.textContent = message;
             notification.style.cssText = `
                 position: fixed;
                 top: 20px;
@@ -884,7 +911,35 @@
             }, 3000);
         }
 
-        // Add slide animations
+        // Inicialización cuando se carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            loadConductoresFromDatabase();
+            
+            document.getElementById('filter-status').addEventListener('change', filterConductores);
+            document.getElementById('search-input').addEventListener('input', filterConductores);
+            
+            document.getElementById('new-conductor-btn').addEventListener('click', showNewConductorModal);
+            
+            document.getElementById('newConductorForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const conductorData = {
+                    nombre: formData.get('nombre'),
+                    rut: formData.get('rut'),
+                    licencia: formData.get('licencia'),
+                    telefono: formData.get('telefono'),
+                    email: formData.get('email'),
+                    activo: formData.get('activo') === 'on'
+                };
+
+                await createConductor(conductorData);
+            });
+            
+            console.log('👨‍💼 Módulo de Conductores cargado exitosamente');
+        });
+
+        // Estilos para las animaciones de notificaciones
         const style = document.createElement('style');
         style.textContent = `
             @keyframes slideInRight {
@@ -919,37 +974,6 @@
                 }
             });
         }
-
-        // Simulate real-time updates
-        function simulateRealTimeUpdate() {
-            const badges = document.querySelectorAll('.badge');
-            setInterval(() => {
-                const randomBadge = badges[Math.floor(Math.random() * badges.length)];
-                const currentStatus = randomBadge.textContent;
-                const statuses = ['Activo', 'Vacaciones', 'Licencia', 'Inactivo'];
-                const newStatus = statuses[Math.floor(Math.random() * statuses.length)];
-                
-                if (currentStatus !== newStatus) {
-                    randomBadge.textContent = newStatus;
-                    
-                    // Update badge class based on status
-                    randomBadge.className = 'badge';
-                    if (newStatus === 'Activo') randomBadge.classList.add('active');
-                    else if (newStatus === 'Vacaciones') randomBadge.classList.add('warning');
-                    else if (newStatus === 'Licencia') randomBadge.classList.add('alert');
-                    else if (newStatus === 'Inactivo') randomBadge.classList.add('pending');
-                    
-                    randomBadge.style.transform = 'scale(1.2)';
-                    setTimeout(() => {
-                        randomBadge.style.transform = 'scale(1)';
-                    }, 300);
-                }
-            }, 15000);
-        }
-
-        simulateRealTimeUpdate();
-
-        console.log('👨‍💼 Módulo de Conductores cargado exitosamente');
     </script>
 </body>
 </html>

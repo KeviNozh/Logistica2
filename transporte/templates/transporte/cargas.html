@@ -308,29 +308,59 @@
             font-weight: 600;
         }
 
-        .badge.active {
+        .badge.entregado {
             background: rgba(16, 185, 129, 0.2);
             color: var(--success);
         }
 
-        .badge.pending {
-            background: rgba(245, 158, 11, 0.2);
-            color: var(--accent);
+        .badge.transito {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--info);
         }
 
-        .badge.alert {
-            background: rgba(239, 68, 68, 0.2);
-            color: var(--danger);
-        }
-
-        .badge.warning {
+        .badge.cargado {
             background: rgba(245, 158, 11, 0.2);
             color: var(--warning);
         }
 
-        .badge.info {
+        .badge.pendiente {
+            background: rgba(148, 163, 184, 0.2);
+            color: var(--text-secondary);
+        }
+
+        .badge.general {
             background: rgba(59, 130, 246, 0.2);
             color: var(--info);
+        }
+
+        .badge.peligrosa {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .badge.refrigerada {
+            background: rgba(14, 165, 233, 0.2);
+            color: #38bdf8;
+        }
+
+        .badge.fragil {
+            background: rgba(139, 92, 246, 0.2);
+            color: #a78bfa;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .error {
+            text-align: center;
+            padding: 2rem;
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 12px;
+            margin: 1rem 0;
         }
 
         .pagination {
@@ -383,6 +413,17 @@
 
         .action-btn:hover {
             background: var(--primary);
+            color: white;
+        }
+
+        .action-btn.delete {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        .action-btn.delete:hover {
+            background: var(--danger);
             color: white;
         }
 
@@ -524,17 +565,17 @@
 
         <div class="nav-menu">
             <div class="nav-item" onclick="window.location.href='{% url 'dashboard' %}'">📊 Dashboard</div>
-            <div class="nav-item" onclick="window.location.href='despachos.html'">📦 Despachos</div>
-            <div class="nav-item" onclick="window.location.href='rutas.html'">🗺️ Rutas</div>
-            <div class="nav-item" onclick="window.location.href='vehiculos.html'">🚛 Vehículos</div>
-            <div class="nav-item" onclick="window.location.href='aeronaves.html'">✈️ Aeronaves</div>
-            <div class="nav-item" onclick="window.location.href='conductores.html'">👨‍💼 Conductores</div>
-            <div class="nav-item" onclick="window.location.href='pilotos.html'">👨‍✈️ Pilotos</div>
-            <div class="nav-item" onclick="window.location.href='clientes.html'">👥 Clientes</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'despachos' %}'">📦 Despachos</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'rutas' %}'">🗺️ Rutas</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'vehiculos' %}'">🚛 Vehículos</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'aeronaves' %}'">✈️ Aeronaves</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'conductores' %}'">👨‍💼 Conductores</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'pilotos' %}'">👨‍✈️ Pilotos</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'clientes' %}'">👥 Clientes</div>
             <div class="nav-item active" onclick="window.location.href='{% url 'cargas' %}'">📦 Cargas</div>
-            <div class="nav-item" onclick="window.location.href='seguros.html'">🛡️ Seguros</div>
-            <div class="nav-item" onclick="window.location.href='reportes.html'">📈 Reportes</div>
-            <div class="nav-item" onclick="window.location.href='api.html'">🔗 API</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'seguros' %}'">🛡️ Seguros</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'reportes' %}'">📈 Reportes</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'api' %}'">🔗 API</div>
         </div>
 
         <div class="page-title">
@@ -544,14 +585,14 @@
 
         <div class="filters">
             <div class="filter-group">
-                <select class="filter-select">
+                <select class="filter-select" id="filter-status">
                     <option value="">Todos los estados</option>
                     <option value="pendiente">Pendiente</option>
                     <option value="cargado">Cargado</option>
                     <option value="transito">En tránsito</option>
                     <option value="entregado">Entregado</option>
                 </select>
-                <select class="filter-select">
+                <select class="filter-select" id="filter-type">
                     <option value="">Todos los tipos</option>
                     <option value="general">General</option>
                     <option value="peligrosa">Peligrosa</option>
@@ -559,14 +600,14 @@
                     <option value="fragil">Frágil</option>
                 </select>
             </div>
-            <input type="text" class="search-input" placeholder="Buscar carga...">
-            <button class="btn" onclick="showNewCargaModal()">➕ Nueva Carga</button>
+            <input type="text" class="search-input" id="search-input" placeholder="Buscar carga...">
+            <button class="btn" id="new-cargo-btn">➕ Nueva Carga</button>
         </div>
 
         <div class="table-container">
             <div class="table-header">
                 <div class="table-title">Lista de Cargas</div>
-                <div style="color: var(--text-secondary); font-size: 0.9rem;">Total: 156 cargas</div>
+                <div id="cargo-count" style="color: var(--text-secondary); font-size: 0.9rem;">Cargando...</div>
             </div>
             <table class="table">
                 <thead>
@@ -574,91 +615,20 @@
                         <th>ID Carga</th>
                         <th>Descripción</th>
                         <th>Tipo</th>
-                        <th>Peso</th>
-                        <th>Volumen</th>
+                        <th>Peso (kg)</th>
+                        <th>Volumen (m³)</th>
+                        <th>Valor Declarado</th>
                         <th>Cliente</th>
                         <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="cargos-table-body">
                     <tr>
-                        <td>CG-001</td>
-                        <td>Electrónicos de consumo</td>
-                        <td>General</td>
-                        <td>850 kg</td>
-                        <td>12 m³</td>
-                        <td>TechCorp S.A.</td>
-                        <td><span class="badge active">Entregado</span></td>
-                        <td>
-                            <button class="action-btn" onclick="viewCarga('CG-001')">Ver</button>
-                            <button class="action-btn" onclick="editCarga('CG-001')">Editar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>CG-002</td>
-                        <td>Productos químicos</td>
-                        <td>Peligrosa</td>
-                        <td>1,200 kg</td>
-                        <td>8 m³</td>
-                        <td>Global Imports</td>
-                        <td><span class="badge active">En tránsito</span></td>
-                        <td>
-                            <button class="action-btn" onclick="viewCarga('CG-002')">Ver</button>
-                            <button class="action-btn" onclick="editCarga('CG-002')">Editar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>CG-003</td>
-                        <td>Alimentos perecederos</td>
-                        <td>Refrigerada</td>
-                        <td>650 kg</td>
-                        <td>15 m³</td>
-                        <td>ElectroParts</td>
-                        <td><span class="badge pending">Cargado</span></td>
-                        <td>
-                            <button class="action-btn" onclick="viewCarga('CG-003')">Ver</button>
-                            <button class="action-btn" onclick="editCarga('CG-003')">Editar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>CG-004</td>
-                        <td>Vidrio y cerámica</td>
-                        <td>Frágil</td>
-                        <td>300 kg</td>
-                        <td>6 m³</td>
-                        <td>AgroExport</td>
-                        <td><span class="badge warning">Pendiente</span></td>
-                        <td>
-                            <button class="action-btn" onclick="viewCarga('CG-004')">Ver</button>
-                            <button class="action-btn" onclick="editCarga('CG-004')">Editar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>CG-005</td>
-                        <td>Maquinaria industrial</td>
-                        <td>General</td>
-                        <td>2,500 kg</td>
-                        <td>25 m³</td>
-                        <td>Minera Andina</td>
-                        <td><span class="badge active">En tránsito</span></td>
-                        <td>
-                            <button class="action-btn" onclick="viewCarga('CG-005')">Ver</button>
-                            <button class="action-btn" onclick="editCarga('CG-005')">Editar</button>
-                        </td>
+                        <td colspan="9" class="loading">Cargando datos de cargas desde la base de datos...</td>
                     </tr>
                 </tbody>
             </table>
-            <div class="pagination">
-                <div class="pagination-info">Mostrando 1-5 de 156 cargas</div>
-                <div class="pagination-controls">
-                    <button class="pagination-btn">Anterior</button>
-                    <button class="pagination-btn active">1</button>
-                    <button class="pagination-btn">2</button>
-                    <button class="pagination-btn">3</button>
-                    <button class="pagination-btn">Siguiente</button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -669,57 +639,46 @@
             <form id="newCargaForm">
                 <div class="form-group">
                     <label class="form-label">Descripción</label>
-                    <input type="text" class="form-input" required>
+                    <input type="text" class="form-input" name="descripcion" required>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Tipo de Carga</label>
-                        <select class="form-select" required>
+                        <select class="form-select" name="tipo_carga" required>
                             <option value="">Seleccionar tipo</option>
-                            <option value="general">General</option>
-                            <option value="peligrosa">Peligrosa</option>
-                            <option value="refrigerada">Refrigerada</option>
-                            <option value="fragil">Frágil</option>
+                            <option value="General">General</option>
+                            <option value="Peligrosa">Peligrosa</option>
+                            <option value="Refrigerada">Refrigerada</option>
+                            <option value="Frágil">Frágil</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Cliente</label>
-                        <select class="form-select" required>
+                        <select class="form-select" name="cliente" id="cliente-select" required>
                             <option value="">Seleccionar cliente</option>
-                            <option value="CL-001">TechCorp S.A.</option>
-                            <option value="CL-002">Global Imports</option>
-                            <option value="CL-003">ElectroParts</option>
+                            <!-- Los clientes se cargarán dinámicamente -->
                         </select>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Peso (kg)</label>
-                        <input type="number" class="form-input" required>
+                        <input type="number" class="form-input" name="peso_kg" step="0.01" required min="0">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Volumen (m³)</label>
-                        <input type="number" class="form-input" step="0.01" required>
+                        <input type="number" class="form-input" name="volumen_m3" step="0.01" required min="0">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Valor Declarado</label>
-                        <input type="number" class="form-input" placeholder="$" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Estado</label>
-                        <select class="form-select" required>
-                            <option value="pendiente">Pendiente</option>
-                            <option value="cargado">Cargado</option>
-                            <option value="transito">En tránsito</option>
-                            <option value="entregado">Entregado</option>
-                        </select>
+                        <input type="number" class="form-input" name="valor_declarado" step="0.01" placeholder="$" required min="0">
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Notas Especiales</label>
-                    <textarea class="form-input" rows="3"></textarea>
+                    <textarea class="form-input" name="notas_especiales" rows="3"></textarea>
                 </div>
                 <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('newCargaModal')">Cancelar</button>
@@ -738,56 +697,369 @@
     </div>
 
     <script>
+        // Variable global para almacenar las cargas
+        let cargosData = [];
+
+        // Función para cargar cargas desde la base de datos
+        async function loadCargosFromDatabase() {
+            try {
+                showLoadingState();
+                
+                const response = await fetch('/api/cargas/');
+                
+                if (!response.ok) {
+                    throw new Error('Error al cargar las cargas');
+                }
+                
+                cargosData = await response.json();
+                renderCargosTable(cargosData);
+                showNotification('Datos de cargas cargados correctamente');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showErrorState('Error al cargar las cargas: ' + error.message);
+            }
+        }
+
+        // Función para mostrar estado de carga
+        function showLoadingState() {
+            const tableBody = document.getElementById('cargos-table-body');
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="9" class="loading">Cargando datos de cargas desde la base de datos...</td>
+                </tr>
+            `;
+            document.getElementById('cargo-count').textContent = 'Cargando...';
+        }
+
+        // Función para mostrar estado de error
+        function showErrorState(message) {
+            const tableBody = document.getElementById('cargos-table-body');
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="9">
+                        <div class="error">
+                            ${message}
+                            <br>
+                            <button class="btn" onclick="loadCargosFromDatabase()" style="margin-top: 1rem;">
+                                Reintentar
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            document.getElementById('cargo-count').textContent = 'Error';
+        }
+
+        // Función para simular estado (ya que no existe en el modelo Carga)
+        function getCargoStatus(cargoId) {
+            const statuses = ['pendiente', 'cargado', 'transito', 'entregado'];
+            return statuses[cargoId % statuses.length];
+        }
+
+        // Función para formatear moneda
+        function formatCurrency(amount) {
+            if (!amount) return 'N/A';
+            return new Intl.NumberFormat('es-CL', {
+                style: 'currency',
+                currency: 'CLP'
+            }).format(amount);
+        }
+
+        // Función para renderizar la tabla de cargas
+        function renderCargosTable(cargos) {
+            const tableBody = document.getElementById('cargos-table-body');
+            const cargoCount = document.getElementById('cargo-count');
+            
+            if (cargos.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="loading">No se encontraron cargas en la base de datos</td>
+                    </tr>
+                `;
+                cargoCount.textContent = 'Total: 0 cargas';
+                return;
+            }
+            
+            tableBody.innerHTML = '';
+            cargoCount.textContent = `Total: ${cargos.length} cargas`;
+            
+            cargos.forEach(cargo => {
+                const row = document.createElement('tr');
+                
+                // USAR CAMPOS REALES DE LA BASE DE DATOS
+                const status = getCargoStatus(cargo.id); // Estado simulado
+                
+                let statusClass = '';
+                let statusText = '';
+                
+                switch (status) {
+                    case 'entregado':
+                        statusClass = 'entregado';
+                        statusText = 'Entregado';
+                        break;
+                    case 'transito':
+                        statusClass = 'transito';
+                        statusText = 'En tránsito';
+                        break;
+                    case 'cargado':
+                        statusClass = 'cargado';
+                        statusText = 'Cargado';
+                        break;
+                    case 'pendiente':
+                        statusClass = 'pendiente';
+                        statusText = 'Pendiente';
+                        break;
+                    default:
+                        statusClass = 'pendiente';
+                        statusText = 'Pendiente';
+                }
+
+                // Tipo basado en campo real 'tipo_carga'
+                let typeClass = '';
+                let typeText = cargo.tipo_carga || 'General';
+                
+                switch (cargo.tipo_carga?.toLowerCase()) {
+                    case 'peligrosa':
+                        typeClass = 'peligrosa';
+                        break;
+                    case 'refrigerada':
+                        typeClass = 'refrigerada';
+                        break;
+                    case 'frágil':
+                    case 'fragil':
+                        typeClass = 'fragil';
+                        break;
+                    default:
+                        typeClass = 'general';
+                }
+                
+                // Obtener nombre del cliente
+                const clienteNombre = cargo.cliente ? 
+                    (cargo.cliente_razon_social || cargo.cliente.razon_social || 'Cliente') : 
+                    'N/A';
+                
+                row.innerHTML = `
+                    <td>${cargo.id || 'N/A'}</td>
+                    <td>${cargo.descripcion || 'N/A'}</td>
+                    <td><span class="badge ${typeClass}">${typeText}</span></td>
+                    <td>${cargo.peso_kg ? cargo.peso_kg + ' kg' : 'N/A'}</td>
+                    <td>${cargo.volumen_m3 ? cargo.volumen_m3 + ' m³' : 'N/A'}</td>
+                    <td>${formatCurrency(cargo.valor_declarado)}</td>
+                    <td>${clienteNombre}</td>
+                    <td><span class="badge ${statusClass}">${statusText}</span></td>
+                    <td>
+                        <button class="action-btn" onclick="viewCargo(${cargo.id})">Ver</button>
+                        <button class="action-btn" onclick="editCargo(${cargo.id})">Editar</button>
+                        <button class="action-btn delete" onclick="deleteCargo(${cargo.id})">Eliminar</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Función para filtrar cargas
+        function filterCargos() {
+            const statusFilter = document.getElementById('filter-status').value;
+            const typeFilter = document.getElementById('filter-type').value;
+            const searchText = document.getElementById('search-input').value.toLowerCase();
+            
+            const filteredCargos = cargosData.filter(cargo => {
+                // Estado simulado
+                const status = getCargoStatus(cargo.id);
+                const matchesStatus = !statusFilter || status === statusFilter;
+                
+                // Tipo real
+                const matchesType = !typeFilter || 
+                    (cargo.tipo_carga && cargo.tipo_carga.toLowerCase().includes(typeFilter.toLowerCase()));
+                
+                // Búsqueda
+                const matchesSearch = !searchText || 
+                    (cargo.descripcion && cargo.descripcion.toLowerCase().includes(searchText)) ||
+                    (cargo.cliente_razon_social && cargo.cliente_razon_social.toLowerCase().includes(searchText)) ||
+                    (cargo.id && cargo.id.toString().includes(searchText));
+                
+                return matchesStatus && matchesType && matchesSearch;
+            });
+            
+            renderCargosTable(filteredCargos);
+        }
+
+        // Funciones de acción para las cargas
+        async function viewCargo(cargoId) {
+            try {
+                const response = await fetch(`/api/cargas/${cargoId}/`);
+                const cargoDetails = await response.json();
+                
+                showNotification(`Viendo detalles de la carga ${cargoId}`);
+                
+                // Mostrar detalles en modal
+                document.getElementById('viewCargaTitle').textContent = `Detalles de Carga #${cargoId}`;
+                document.getElementById('viewCargaContent').innerHTML = `
+                    <div style="display: grid; gap: 1rem;">
+                        <div><strong>Descripción:</strong> ${cargoDetails.descripcion || 'N/A'}</div>
+                        <div><strong>Tipo:</strong> ${cargoDetails.tipo_carga || 'N/A'}</div>
+                        <div><strong>Peso:</strong> ${cargoDetails.peso_kg || 'N/A'} kg</div>
+                        <div><strong>Volumen:</strong> ${cargoDetails.volumen_m3 || 'N/A'} m³</div>
+                        <div><strong>Valor Declarado:</strong> ${formatCurrency(cargoDetails.valor_declarado)}</div>
+                        <div><strong>Cliente:</strong> ${cargoDetails.cliente_razon_social || 'N/A'}</div>
+                        <div><strong>Notas:</strong> ${cargoDetails.notas_especiales || 'Sin notas especiales'}</div>
+                    </div>
+                `;
+                showModal('viewCargaModal');
+                
+            } catch (error) {
+                console.error('Error al obtener detalles:', error);
+                showNotification('Error al cargar detalles de la carga');
+            }
+        }
+
+        async function editCargo(cargoId) {
+            showNotification(`Editando la carga ${cargoId}`);
+            // Redirigir a página de edición
+            window.location.href = `/cargas/${cargoId}/editar/`;
+        }
+
+        async function deleteCargo(cargoId) {
+            if (confirm('¿Está seguro de que desea eliminar esta carga?')) {
+                try {
+                    const response = await fetch(`/api/cargas/${cargoId}/`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCSRFToken()
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        await loadCargosFromDatabase();
+                        showNotification('Carga eliminada correctamente');
+                    } else {
+                        throw new Error('Error al eliminar la carga');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showNotification('Error al eliminar la carga');
+                }
+            }
+        }
+
+        // FUNCIONES NUEVAS PARA CREAR CARGAS
+        async function loadClientesForSelect() {
+            try {
+                const response = await fetch('/api/clientes/');
+                if (response.ok) {
+                    const clientes = await response.json();
+                    const select = document.getElementById('cliente-select');
+                    
+                    // Limpiar opciones excepto la primera
+                    while (select.children.length > 1) {
+                        select.removeChild(select.lastChild);
+                    }
+                    
+                    // Agregar clientes activos
+                    clientes.forEach(cliente => {
+                        if (cliente.activo) {
+                            const option = document.createElement('option');
+                            option.value = cliente.id;
+                            option.textContent = cliente.razon_social || cliente.nombre || `Cliente ${cliente.id}`;
+                            select.appendChild(option);
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error al cargar clientes:', error);
+                // Si hay error, mostrar opciones de ejemplo
+                const select = document.getElementById('cliente-select');
+                const option = document.createElement('option');
+                option.value = "1";
+                option.textContent = "Cliente de Ejemplo";
+                select.appendChild(option);
+            }
+        }
+
+        async function createCarga(formData) {
+            try {
+                const response = await fetch('/api/cargas/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken()
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    const newCarga = await response.json();
+                    showNotification('Carga creada exitosamente');
+                    closeModal('newCargaModal');
+                    await loadCargosFromDatabase(); // Recargar la lista
+                    return newCarga;
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Error al crear la carga');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Error al crear la carga: ' + error.message);
+                throw error;
+            }
+        }
+
+        function handleCargaFormSubmit(e) {
+            e.preventDefault();
+            
+            const form = e.target;
+            const formData = {
+                descripcion: form.querySelector('input[name="descripcion"]').value,
+                tipo_carga: form.querySelector('select[name="tipo_carga"]').value,
+                peso_kg: parseFloat(form.querySelector('input[name="peso_kg"]').value),
+                volumen_m3: parseFloat(form.querySelector('input[name="volumen_m3"]').value),
+                valor_declarado: parseFloat(form.querySelector('input[name="valor_declarado"]').value),
+                cliente: form.querySelector('select[name="cliente"]').value,
+                notas_especiales: form.querySelector('textarea[name="notas_especiales"]').value
+            };
+            
+            createCarga(formData);
+        }
+
+        async function showNewCargaModal() {
+            await loadClientesForSelect();
+            showModal('newCargaModal');
+        }
+
+        // Función auxiliar para obtener el token CSRF
+        function getCSRFToken() {
+            const name = 'csrftoken';
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Modal Functions
         function showModal(modalId) {
             document.getElementById(modalId).style.display = 'block';
         }
 
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
+            // Resetear formulario
+            if (modalId === 'newCargaModal') {
+                document.getElementById('newCargaForm').reset();
+            }
         }
 
-        function showNewCargaModal() {
-            showModal('newCargaModal');
-        }
-
-        function viewCarga(cargaId) {
-            const content = `
-                <div style="line-height: 1.6;">
-                    <p><strong>ID:</strong> ${cargaId}</p>
-                    <p><strong>Descripción:</strong> Electrónicos de consumo</p>
-                    <p><strong>Tipo:</strong> General</p>
-                    <p><strong>Peso:</strong> 850 kg</p>
-                    <p><strong>Volumen:</strong> 12 m³</p>
-                    <p><strong>Valor Declarado:</strong> $25,000</p>
-                    <p><strong>Cliente:</strong> TechCorp S.A.</p>
-                    <p><strong>Estado:</strong> <span class="badge active">Entregado</span></p>
-                    <p><strong>Notas Especiales:</strong> Manejar con cuidado, productos frágiles</p>
-                    <div style="margin-top: 1.5rem;">
-                        <h4>Información de Transporte</h4>
-                        <ul style="margin-top: 0.5rem;">
-                            <li>Despacho Asignado: D-2042</li>
-                            <li>Vehículo: ABC-123</li>
-                            <li>Conductor: Carlos López</li>
-                            <li>Fecha de Entrega: 10/12/2023</li>
-                        </ul>
-                    </div>
-                </div>
-            `;
-            document.getElementById('viewCargaTitle').textContent = `Carga ${cargaId}`;
-            document.getElementById('viewCargaContent').innerHTML = content;
-            showModal('viewCargaModal');
-        }
-
-        function editCarga(cargaId) {
-            showNotification(`Editando carga ${cargaId}...`);
-        }
-
-        document.getElementById('newCargaForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            showNotification('Carga creada exitosamente');
-            closeModal('newCargaModal');
-        });
-
+        // Notification System
         function showNotification(message) {
             const notification = document.createElement('div');
             notification.textContent = `✓ ${message}`;
@@ -813,6 +1085,24 @@
             }, 3000);
         }
 
+        // Inicialización cuando se carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCargosFromDatabase();
+            
+            document.getElementById('filter-status').addEventListener('change', filterCargos);
+            document.getElementById('filter-type').addEventListener('change', filterCargos);
+            document.getElementById('search-input').addEventListener('input', filterCargos);
+            
+            // Actualizado para abrir el modal y cargar clientes
+            document.getElementById('new-cargo-btn').addEventListener('click', showNewCargaModal);
+            
+            // Agregar event listener para el formulario
+            document.getElementById('newCargaForm').addEventListener('submit', handleCargaFormSubmit);
+            
+            console.log('📦 Módulo de Cargas cargado exitosamente');
+        });
+
+        // Estilos para las animaciones de notificaciones
         const style = document.createElement('style');
         style.textContent = `
             @keyframes slideInRight {
@@ -838,6 +1128,7 @@
         `;
         document.head.appendChild(style);
 
+        // Close modal when clicking outside
         window.onclick = function(event) {
             const modals = document.querySelectorAll('.modal');
             modals.forEach(modal => {
@@ -846,8 +1137,6 @@
                 }
             });
         }
-
-        console.log('📦 Módulo de Cargas cargado exitosamente');
     </script>
 </body>
 </html>

@@ -51,4 +51,8 @@ urlpatterns = [
     path('despachos/<int:pk>/editar/', views.editar_despacho, name='despacho_editar'),
     path('despachos/<int:pk>/', views.despacho_detail, name='despacho_detail'),
     path('despachos/<int:pk>/eliminar/', views.eliminar_despacho, name='despacho_eliminar'),
+    
+    # PDF
+    path('reportes/generar-pdf/', views.generar_reporte_pdf, name='generar_reporte_pdf'),
+    path('api/reportes/datos/', views.obtener_datos_reporte, name='obtener_datos_reporte'),
 ]

@@ -484,6 +484,7 @@
                         <td>
                             <a href="{% url 'despacho_detail' despacho.pk %}" class="action-btn">Ver</a>
                             <a href="{% url 'despacho_editar' despacho.pk %}" class="action-btn">Editar</a>
+                            <a href="{% url 'despacho_eliminar' despacho.pk %}" class="action-btn delete">Eliminar</a>
                         </td>
                     </tr>
                     {% empty %}

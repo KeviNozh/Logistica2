@@ -1,4 +1,3 @@
-<!-- despacho_confirm_delete.html -->
 {% extends 'base.html' %}
 
 {% block title %}Eliminar Despacho - Logística Global{% endblock %}
@@ -14,7 +13,9 @@
         <div style="font-size: 4rem; margin-bottom: 1rem;">⚠️</div>
         <h2 style="margin-bottom: 1rem;">¿Estás seguro de que deseas eliminar este despacho?</h2>
         <p style="color: var(--text-secondary); margin-bottom: 2rem;">
-            Despacho #{{ object.id }} - {{ object.ruta.origen }} a {{ object.ruta.destino }}<br>
+            Despacho: D-{{ despacho.id|stringformat:"04d" }}<br>
+            Cliente: {{ despacho.cliente.razon_social }}<br>
+            Ruta: {{ despacho.ruta.origen }} - {{ despacho.ruta.destino }}<br>
             Esta acción no se puede deshacer.
         </p>
     </div>
@@ -23,7 +24,7 @@
         {% csrf_token %}
         <div class="action-buttons" style="justify-content: center;">
             <button type="submit" class="btn btn-danger">Sí, eliminar</button>
-            <a href="{% url 'despacho_detail' object.pk %}" class="btn btn-secondary">Cancelar</a>
+            <a href="{% url 'despacho_detail' despacho.pk %}" class="btn btn-secondary">Cancelar</a>
         </div>
     </form>
 </div>

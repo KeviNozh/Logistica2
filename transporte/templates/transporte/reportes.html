@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reportes - Sistema de Gestión de Transporte</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <style>
-        /* Todos los estilos del dashboard original */
         * {
             margin: 0;
             padding: 0;
@@ -69,17 +70,9 @@
         .bg-animation span:nth-child(10) { left: 85%; animation-delay: 0s; animation-duration: 11s; }
 
         @keyframes float {
-            0% {
-                transform: translateY(100vh) scale(0);
-                opacity: 0;
-            }
-            50% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100vh) scale(1);
-                opacity: 0;
-            }
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-100vh) scale(1); opacity: 0; }
         }
 
         .container {
@@ -104,14 +97,8 @@
         }
 
         @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .logo {
@@ -388,52 +375,6 @@
             color: var(--danger);
         }
 
-        .badge.warning {
-            background: rgba(245, 158, 11, 0.2);
-            color: var(--warning);
-        }
-
-        .badge.info {
-            background: rgba(59, 130, 246, 0.2);
-            color: var(--info);
-        }
-
-        .pagination {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem 2rem;
-            border-top: 1px solid var(--border);
-        }
-
-        .pagination-info {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .pagination-controls {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .pagination-btn {
-            padding: 0.6rem 1rem;
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text-primary);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .pagination-btn:hover {
-            background: var(--primary);
-        }
-
-        .pagination-btn.active {
-            background: var(--primary);
-        }
-
         .action-btn {
             padding: 0.4rem 0.8rem;
             background: rgba(99, 102, 241, 0.2);
@@ -451,54 +392,123 @@
             color: white;
         }
 
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-modal:hover {
+            color: var(--danger);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-
-            .header {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .filters {
-                flex-direction: column;
-            }
-
-            .filter-group {
-                width: 100%;
-            }
-
-            .filter-select, .search-input {
-                min-width: 100%;
-            }
-
-            .table-container {
-                overflow-x: auto;
-            }
-
-            .table {
-                min-width: 800px;
-            }
-
-            .report-grid {
-                grid-template-columns: 1fr;
-            }
+            .container { padding: 1rem; }
+            .header { flex-direction: column; gap: 1rem; }
+            .filters { flex-direction: column; }
+            .filter-group { width: 100%; }
+            .filter-select, .search-input { min-width: 100%; }
+            .table-container { overflow-x: auto; }
+            .table { min-width: 800px; }
+            .report-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
     <div class="bg-animation">
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
     </div>
 
     <div class="container">
@@ -509,26 +519,32 @@
             </div>
             <div class="user-info">
                 <div>
-                    <div style="font-weight: 600;">Admin Usuario</div>
-                    <div style="font-size: 0.85rem; color: var(--text-secondary);">Administrador del Sistema</div>
+                    <div style="font-weight: 600;" id="currentUserName">
+                        {{ user.get_full_name|default:user.username }}
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                        {% if user.is_staff %}Administrador{% else %}Usuario{% endif %}
+                    </div>
                 </div>
-                <div class="avatar">AU</div>
+                <div class="avatar" onclick="window.location.href='{% url 'logout' %}'" title="Cerrar sesión">
+                    {{ user.username|slice:":2"|upper }}
+                </div>
             </div>
         </div>
 
         <div class="nav-menu">
-            <div class="nav-item" onclick="window.location.href='dashboard.html'">📊 Dashboard</div>
-            <div class="nav-item" onclick="window.location.href='despachos.html'">📦 Despachos</div>
-            <div class="nav-item" onclick="window.location.href='rutas.html'">🗺️ Rutas</div>
-            <div class="nav-item" onclick="window.location.href='vehiculos.html'">🚛 Vehículos</div>
-            <div class="nav-item" onclick="window.location.href='aeronaves.html'">✈️ Aeronaves</div>
-            <div class="nav-item" onclick="window.location.href='conductores.html'">👨‍💼 Conductores</div>
-            <div class="nav-item" onclick="window.location.href='pilotos.html'">👨‍✈️ Pilotos</div>
-            <div class="nav-item" onclick="window.location.href='clientes.html'">👥 Clientes</div>
-            <div class="nav-item" onclick="window.location.href='cargas.html'">📦 Cargas</div>
-            <div class="nav-item" onclick="window.location.href='seguros.html'">🛡️ Seguros</div>
-            <div class="nav-item active" onclick="window.location.href='reportes.html'">📈 Reportes</div>
-            <div class="nav-item" onclick="window.location.href='api.html'">🔗 API</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'dashboard' %}'">📊 Dashboard</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'despachos' %}'">📦 Despachos</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'rutas' %}'">🗺️ Rutas</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'vehiculos' %}'">🚛 Vehículos</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'aeronaves' %}'">✈️ Aeronaves</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'conductores' %}'">👨‍💼 Conductores</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'pilotos' %}'">👨‍✈️ Pilotos</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'clientes' %}'">👥 Clientes</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'cargas' %}'">📦 Cargas</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'seguros' %}'">🛡️ Seguros</div>
+            <div class="nav-item active" onclick="window.location.href='{% url 'reportes' %}'">📈 Reportes</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'api' %}'">🔗 API</div>
         </div>
 
         <div class="page-title">
@@ -537,37 +553,37 @@
         </div>
 
         <div class="report-grid">
-            <div class="report-card" onclick="generateReport('despachos')">
+            <div class="report-card" onclick="showReportModal('despachos')">
                 <div class="report-icon">📦</div>
                 <div class="report-title">Reporte de Despachos</div>
                 <div class="report-description">Análisis detallado de despachos por período, estado y cliente</div>
                 <button class="btn">Generar Reporte</button>
             </div>
-            <div class="report-card" onclick="generateReport('financiero')">
+            <div class="report-card" onclick="showReportModal('financiero')">
                 <div class="report-icon">💰</div>
                 <div class="report-title">Reporte Financiero</div>
                 <div class="report-description">Ingresos, gastos y rentabilidad por período y cliente</div>
                 <button class="btn">Generar Reporte</button>
             </div>
-            <div class="report-card" onclick="generateReport('flota')">
+            <div class="report-card" onclick="showReportModal('flota')">
                 <div class="report-icon">🚛</div>
                 <div class="report-title">Reporte de Flota</div>
                 <div class="report-description">Estado, mantenimiento y utilización de vehículos y aeronaves</div>
                 <button class="btn">Generar Reporte</button>
             </div>
-            <div class="report-card" onclick="generateReport('clientes')">
+            <div class="report-card" onclick="showReportModal('clientes')">
                 <div class="report-icon">👥</div>
                 <div class="report-title">Reporte de Clientes</div>
                 <div class="report-description">Análisis de clientes, volumen de negocio y satisfacción</div>
                 <button class="btn">Generar Reporte</button>
             </div>
-            <div class="report-card" onclick="generateReport('seguros')">
+            <div class="report-card" onclick="showReportModal('seguros')">
                 <div class="report-icon">🛡️</div>
                 <div class="report-title">Reporte de Seguros</div>
                 <div class="report-description">Estado de pólizas, vencimientos y coberturas</div>
                 <button class="btn">Generar Reporte</button>
             </div>
-            <div class="report-card" onclick="generateReport('personal')">
+            <div class="report-card" onclick="showReportModal('personal')">
                 <div class="report-icon">👨‍💼</div>
                 <div class="report-title">Reporte de Personal</div>
                 <div class="report-description">Rendimiento, disponibilidad y certificaciones del personal</div>
@@ -577,30 +593,34 @@
 
         <div class="filters">
             <div class="filter-group">
-                <select class="filter-select">
+                <select class="filter-select" id="filterType">
                     <option value="">Todos los tipos</option>
                     <option value="despachos">Despachos</option>
                     <option value="financiero">Financiero</option>
                     <option value="flota">Flota</option>
                     <option value="clientes">Clientes</option>
                 </select>
-                <select class="filter-select">
+                <select class="filter-select" id="filterStatus">
                     <option value="">Todos los estados</option>
                     <option value="completado">Completado</option>
                     <option value="procesando">Procesando</option>
                     <option value="error">Error</option>
                 </select>
             </div>
-            <input type="text" class="search-input" placeholder="Buscar reporte...">
+            <input type="text" class="search-input" id="searchReport" placeholder="Buscar reporte...">
             <button class="btn" onclick="showNewReportModal()">➕ Nuevo Reporte</button>
         </div>
 
         <div class="table-container">
             <div class="table-header">
                 <div class="table-title">Reportes Generados</div>
-                <div style="color: var(--text-secondary); font-size: 0.9rem;">Total: 24 reportes</div>
+                <div style="color: var(--text-secondary); font-size: 0.9rem;">Total: <span id="totalReports">0</span> reportes</div>
             </div>
-            <table class="table">
+            <div class="loading" id="loadingReports">
+                <div class="spinner"></div>
+                <div>Cargando reportes...</div>
+            </div>
+            <table class="table" id="reportsTable">
                 <thead>
                     <tr>
                         <th>ID Reporte</th>
@@ -612,122 +632,537 @@
                         <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td>RPT-202312-001</td>
-                        <td>Despachos Mensual</td>
-                        <td>Diciembre 2023</td>
-                        <td>Admin Usuario</td>
-                        <td>01/12/2023</td>
-                        <td><span class="badge active">Completado</span></td>
-                        <td>
-                            <button class="action-btn" onclick="viewReport('RPT-202312-001')">Ver</button>
-                            <button class="action-btn" onclick="downloadReport('RPT-202312-001')">Descargar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>RPT-202312-002</td>
-                        <td>Financiero Trimestral</td>
-                        <td>Q4 2023</td>
-                        <td>Admin Usuario</td>
-                        <td>05/12/2023</td>
-                        <td><span class="badge active">Completado</span></td>
-                        <td>
-                            <button class="action-btn" onclick="viewReport('RPT-202312-002')">Ver</button>
-                            <button class="action-btn" onclick="downloadReport('RPT-202312-002')">Descargar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>RPT-202312-003</td>
-                        <td>Estado de Flota</td>
-                        <td>Diciembre 2023</td>
-                        <td>Admin Usuario</td>
-                        <td>10/12/2023</td>
-                        <td><span class="badge pending">Procesando</span></td>
-                        <td>
-                            <button class="action-btn" onclick="viewReport('RPT-202312-003')">Ver</button>
-                            <button class="action-btn" onclick="downloadReport('RPT-202312-003')">Descargar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>RPT-202311-001</td>
-                        <td>Clientes Anual</td>
-                        <td>2023</td>
-                        <td>Admin Usuario</td>
-                        <td>30/11/2023</td>
-                        <td><span class="badge active">Completado</span></td>
-                        <td>
-                            <button class="action-btn" onclick="viewReport('RPT-202311-001')">Ver</button>
-                            <button class="action-btn" onclick="downloadReport('RPT-202311-001')">Descargar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>RPT-202311-002</td>
-                        <td>Seguros Vencidos</td>
-                        <td>Noviembre 2023</td>
-                        <td>Admin Usuario</td>
-                        <td>25/11/2023</td>
-                        <td><span class="badge alert">Error</span></td>
-                        <td>
-                            <button class="action-btn" onclick="viewReport('RPT-202311-002')">Ver</button>
-                            <button class="action-btn" onclick="regenerateReport('RPT-202311-002')">Regenerar</button>
-                        </td>
-                    </tr>
+                <tbody id="reportsTableBody">
+                    <!-- Los reportes se cargarán dinámicamente -->
                 </tbody>
             </table>
-            <div class="pagination">
-                <div class="pagination-info">Mostrando 1-5 de 24 reportes</div>
-                <div class="pagination-controls">
-                    <button class="pagination-btn">Anterior</button>
-                    <button class="pagination-btn active">1</button>
-                    <button class="pagination-btn">2</button>
-                    <button class="pagination-btn">3</button>
-                    <button class="pagination-btn">Siguiente</button>
-                </div>
+        </div>
+    </div>
+
+    <!-- Modal para generar reportes -->
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Generar Reporte</h2>
+                <button class="close-modal" onclick="closeReportModal()">&times;</button>
             </div>
+            <form id="reportForm">
+                <div class="form-group">
+                    <label class="form-label" for="reportType">Tipo de Reporte</label>
+                    <select class="form-select" id="reportType" required>
+                        <option value="">Seleccione un tipo</option>
+                        <option value="despachos">Reporte de Despachos</option>
+                        <option value="financiero">Reporte Financiero</option>
+                        <option value="flota">Reporte de Flota</option>
+                        <option value="clientes">Reporte de Clientes</option>
+                        <option value="seguros">Reporte de Seguros</option>
+                        <option value="personal">Reporte de Personal</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="period">Período</label>
+                    <select class="form-select" id="period" required>
+                        <option value="">Seleccione un período</option>
+                        <option value="diario">Diario</option>
+                        <option value="semanal">Semanal</option>
+                        <option value="mensual">Mensual</option>
+                        <option value="trimestral">Trimestral</option>
+                        <option value="anual">Anual</option>
+                        <option value="personalizado">Personalizado</option>
+                    </select>
+                </div>
+                <div class="form-group" id="customDateRange" style="display: none;">
+                    <div style="display: flex; gap: 1rem;">
+                        <div style="flex: 1;">
+                            <label class="form-label" for="startDate">Fecha Inicio</label>
+                            <input type="date" class="form-input" id="startDate">
+                        </div>
+                        <div style="flex: 1;">
+                            <label class="form-label" for="endDate">Fecha Fin</label>
+                            <input type="date" class="form-input" id="endDate">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="format">Formato</label>
+                    <select class="form-select" id="format" required>
+                        <option value="pdf">PDF</option>
+                        <option value="excel">Excel</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeReportModal()">Cancelar</button>
+                    <button type="submit" class="btn">Generar Reporte</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
-        function generateReport(tipo) {
-            showNotification(`Generando reporte de ${tipo}...`);
-            // Simulate report generation
+        // Inicializar jsPDF
+        const { jsPDF } = window.jspdf;
+
+        // Variables globales
+        let currentReportType = '';
+        let generatedReports = [];
+
+        // Función para obtener el usuario actual
+        function getCurrentUser() {
+            const userNameElement = document.getElementById('currentUserName');
+            return userNameElement ? userNameElement.textContent.trim() : 'Usuario';
+        }
+
+        // Función para obtener datos reales de la base de datos
+        async function obtenerDatosReales(tipoReporte) {
+            try {
+                showNotification(`Obteniendo datos de ${getReportTitle(tipoReporte)}...`);
+                
+                const response = await fetch(`/api/reportes/datos/?type=${tipoReporte}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    return result.data;
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                console.error('Error al obtener datos:', error);
+                showNotification('Error al obtener datos del reporte', 'error');
+                return [];
+            }
+        }
+
+        // Cargar reportes al iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            loadGeneratedReports();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Filtros
+            document.getElementById('filterType').addEventListener('change', filterReports);
+            document.getElementById('filterStatus').addEventListener('change', filterReports);
+            document.getElementById('searchReport').addEventListener('input', filterReports);
+            
+            // Modal
+            document.getElementById('period').addEventListener('change', function() {
+                const customDateRange = document.getElementById('customDateRange');
+                customDateRange.style.display = this.value === 'personalizado' ? 'block' : 'none';
+            });
+
+            // Formulario
+            document.getElementById('reportForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                generateReport();
+            });
+        }
+
+        function loadGeneratedReports() {
+            document.getElementById('loadingReports').style.display = 'block';
+            
+            // Simular carga desde base de datos
             setTimeout(() => {
-                showNotification(`✓ Reporte de ${tipo} generado exitosamente`);
-            }, 2000);
+                generatedReports = JSON.parse(localStorage.getItem('generatedReports')) || [];
+                renderReportsTable();
+                document.getElementById('loadingReports').style.display = 'none';
+            }, 1000);
         }
 
-        function viewReport(reportId) {
-            showNotification(`Visualizando reporte ${reportId}...`);
-            // In a real application, this would open the report in a modal or new tab
+        function renderReportsTable() {
+            const tbody = document.getElementById('reportsTableBody');
+            tbody.innerHTML = '';
+            
+            generatedReports.forEach(report => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${report.id}</td>
+                    <td>${getReportTitle(report.type)}</td>
+                    <td>${report.period}</td>
+                    <td>${report.generatedBy}</td>
+                    <td>${report.date}</td>
+                    <td><span class="badge ${report.status === 'Completado' ? 'active' : report.status === 'Procesando' ? 'pending' : 'alert'}">${report.status}</span></td>
+                    <td>
+                        <button class="action-btn" onclick="viewReport('${report.id}')">Ver</button>
+                        <button class="action-btn" onclick="downloadReport('${report.id}')">Descargar</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            document.getElementById('totalReports').textContent = generatedReports.length;
         }
 
-        function downloadReport(reportId) {
-            showNotification(`Descargando reporte ${reportId}...`);
-            // In a real application, this would trigger the download
+        function filterReports() {
+            const typeFilter = document.getElementById('filterType').value;
+            const statusFilter = document.getElementById('filterStatus').value;
+            const searchFilter = document.getElementById('searchReport').value.toLowerCase();
+            
+            const rows = document.querySelectorAll('#reportsTableBody tr');
+            
+            rows.forEach(row => {
+                const type = row.cells[1].textContent.toLowerCase();
+                const status = row.cells[5].textContent.toLowerCase();
+                const id = row.cells[0].textContent.toLowerCase();
+                
+                const typeMatch = !typeFilter || type.includes(typeFilter);
+                const statusMatch = !statusFilter || status.includes(statusFilter);
+                const searchMatch = !searchFilter || id.includes(searchFilter) || type.includes(searchFilter);
+                
+                row.style.display = typeMatch && statusMatch && searchMatch ? '' : 'none';
+            });
         }
 
-        function regenerateReport(reportId) {
-            showNotification(`Regenerando reporte ${reportId}...`);
-            // In a real application, this would regenerate the report
-            setTimeout(() => {
-                showNotification(`✓ Reporte ${reportId} regenerado exitosamente`);
-            }, 2000);
+        function showReportModal(type) {
+            currentReportType = type;
+            const modal = document.getElementById('reportModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const reportType = document.getElementById('reportType');
+            
+            modalTitle.textContent = `Generar Reporte de ${getReportTitle(type)}`;
+            reportType.value = type;
+            modal.style.display = 'flex';
+        }
+
+        function closeReportModal() {
+            document.getElementById('reportModal').style.display = 'none';
+            document.getElementById('reportForm').reset();
+            document.getElementById('customDateRange').style.display = 'none';
         }
 
         function showNewReportModal() {
-            showNotification('Abriendo generador de reportes personalizados...');
-            // In a real application, this would open a modal for custom report generation
+            currentReportType = '';
+            document.getElementById('reportModal').style.display = 'flex';
+            document.getElementById('modalTitle').textContent = 'Generar Nuevo Reporte';
+            document.getElementById('reportType').value = '';
         }
 
-        function showNotification(message) {
+        async function generateReport() {
+            const reportType = document.getElementById('reportType').value;
+            const period = document.getElementById('period').value;
+            const format = document.getElementById('format').value;
+            
+            if (!reportType || !period) {
+                showNotification('Por favor complete todos los campos requeridos', 'error');
+                return;
+            }
+
+            const currentUser = getCurrentUser();
+
+            // Crear nuevo reporte
+            const newReport = {
+                id: `RPT-${Date.now()}`,
+                type: reportType,
+                period: period,
+                generatedBy: currentUser,
+                date: new Date().toLocaleDateString(),
+                status: 'Procesando',
+                format: format
+            };
+
+            generatedReports.unshift(newReport);
+            localStorage.setItem('generatedReports', JSON.stringify(generatedReports));
+            renderReportsTable();
+
+            closeReportModal();
+            showNotification(`Generando reporte ${getReportTitle(reportType)} con datos reales...`);
+
+            // Procesar con datos reales
+            try {
+                if (format === 'pdf') {
+                    await generatePDFReport(reportType, period);
+                } else {
+                    await generateExcelReport(reportType, period);
+                }
+                
+                newReport.status = 'Completado';
+                localStorage.setItem('generatedReports', JSON.stringify(generatedReports));
+                renderReportsTable();
+                
+            } catch (error) {
+                newReport.status = 'Error';
+                localStorage.setItem('generatedReports', JSON.stringify(generatedReports));
+                renderReportsTable();
+                showNotification('Error al generar el reporte', 'error');
+            }
+        }
+
+        // Función principal para generar PDF con datos reales
+        async function generatePDFReport(type, period) {
+            try {
+                // Obtener datos reales de la base de datos
+                const realData = await obtenerDatosReales(type);
+                
+                if (realData.length === 0) {
+                    showNotification('No hay datos disponibles para generar el reporte', 'error');
+                    return;
+                }
+
+                const doc = new jsPDF();
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const user = getCurrentUser();
+                
+                // Encabezado
+                doc.setFontSize(20);
+                doc.setTextColor(40, 40, 40);
+                doc.text(`Reporte de ${getReportTitle(type)}`, pageWidth / 2, 20, { align: 'center' });
+                
+                // Información del reporte
+                doc.setFontSize(12);
+                doc.setTextColor(100, 100, 100);
+                doc.text(`Período: ${getPeriodText(period)}`, 20, 40);
+                doc.text(`Generado por: ${user}`, 20, 50);
+                doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 20, 60);
+                doc.text(`Total de registros: ${realData.length}`, 20, 70);
+                
+                // Línea separadora
+                doc.setDrawColor(200, 200, 200);
+                doc.line(20, 80, pageWidth - 20, 80);
+                
+                // Contenido específico del reporte con datos reales
+                let yPosition = 100;
+                
+                switch(type) {
+                    case 'despachos':
+                        await generateDespachosPDF(doc, yPosition, pageWidth, realData);
+                        break;
+                    case 'financiero':
+                        await generateFinancieroPDF(doc, yPosition, pageWidth, realData);
+                        break;
+                    case 'flota':
+                        await generateFlotaPDF(doc, yPosition, pageWidth, realData);
+                        break;
+                    case 'clientes':
+                        await generateClientesPDF(doc, yPosition, pageWidth, realData);
+                        break;
+                    case 'seguros':
+                        await generateSegurosPDF(doc, yPosition, pageWidth, realData);
+                        break;
+                    case 'personal':
+                        await generatePersonalPDF(doc, yPosition, pageWidth, realData);
+                        break;
+                }
+                
+                // Guardar PDF
+                doc.save(`reporte_${type}_${new Date().toISOString().slice(0,10)}.pdf`);
+                showNotification(`✓ Reporte ${getReportTitle(type)} generado exitosamente con datos reales`);
+                
+            } catch (error) {
+                console.error('Error generando PDF:', error);
+                showNotification('Error al generar el reporte PDF', 'error');
+            }
+        }
+
+        // Funciones específicas para cada tipo de reporte
+        async function generateDespachosPDF(doc, yPosition, pageWidth, data) {
+            doc.setFontSize(16);
+            doc.setTextColor(40, 40, 40);
+            doc.text('Resumen de Despachos', 20, yPosition);
+            yPosition += 20;
+            
+            // Tabla de despachos con datos reales
+            const tableData = data.map(item => [
+                item.id,
+                item.cliente,
+                item.fecha,
+                item.estado,
+                `$${item.valor?.toLocaleString() || '0'}`,
+                item.destino
+            ]);
+            
+            doc.autoTable({
+                startY: yPosition,
+                head: [['ID', 'Cliente', 'Fecha', 'Estado', 'Valor', 'Destino']],
+                body: tableData,
+                theme: 'grid',
+                headStyles: { fillColor: [99, 102, 241] },
+                margin: { top: 20 }
+            });
+        }
+
+        async function generateFinancieroPDF(doc, yPosition, pageWidth, data) {
+            doc.setFontSize(16);
+            doc.setTextColor(40, 40, 40);
+            doc.text('Resumen Financiero', 20, yPosition);
+            yPosition += 20;
+            
+            // Tabla financiera con datos reales
+            const tableData = data.map(item => [
+                item.concepto,
+                typeof item.monto === 'number' ? `$${item.monto.toLocaleString()}` : item.monto.toString(),
+                item.tipo
+            ]);
+            
+            doc.autoTable({
+                startY: yPosition,
+                head: [['Concepto', 'Monto', 'Tipo']],
+                body: tableData,
+                theme: 'grid',
+                headStyles: { fillColor: [99, 102, 241] },
+                margin: { top: 20 }
+            });
+        }
+
+        async function generateFlotaPDF(doc, yPosition, pageWidth, data) {
+            doc.setFontSize(16);
+            doc.setTextColor(40, 40, 40);
+            doc.text('Estado de la Flota', 20, yPosition);
+            yPosition += 20;
+            
+            // Tabla de flota con datos reales
+            const tableData = data.map(item => [
+                item.id,
+                item.tipo,
+                item.modelo,
+                item.estado,
+                item.mantenimiento,
+                item.ubicacion
+            ]);
+            
+            doc.autoTable({
+                startY: yPosition,
+                head: [['ID', 'Tipo', 'Modelo', 'Estado', 'Mantenimiento', 'Ubicación']],
+                body: tableData,
+                theme: 'grid',
+                headStyles: { fillColor: [99, 102, 241] },
+                margin: { top: 20 }
+            });
+        }
+
+        async function generateClientesPDF(doc, yPosition, pageWidth, data) {
+            doc.setFontSize(16);
+            doc.setTextColor(40, 40, 40);
+            doc.text('Análisis de Clientes', 20, yPosition);
+            yPosition += 20;
+            
+            // Tabla de clientes con datos reales
+            const tableData = data.map(item => [
+                item.id,
+                item.nombre,
+                item.contacto,
+                item.telefono,
+                item.email,
+                item.volumen?.toString() || '0'
+            ]);
+            
+            doc.autoTable({
+                startY: yPosition,
+                head: [['ID', 'Nombre', 'Contacto', 'Teléfono', 'Email', 'Volumen']],
+                body: tableData,
+                theme: 'grid',
+                headStyles: { fillColor: [99, 102, 241] },
+                margin: { top: 20 }
+            });
+        }
+
+        async function generateSegurosPDF(doc, yPosition, pageWidth, data) {
+            doc.setFontSize(16);
+            doc.setTextColor(40, 40, 40);
+            doc.text('Estado de Seguros', 20, yPosition);
+            yPosition += 20;
+            
+            // Tabla de seguros con datos reales
+            const tableData = data.map(item => [
+                item.poliza,
+                item.tipo,
+                item.aseguradora,
+                item.vencimiento,
+                `$${item.cobertura?.toLocaleString() || '0'}`
+            ]);
+            
+            doc.autoTable({
+                startY: yPosition,
+                head: [['Póliza', 'Tipo', 'Aseguradora', 'Vencimiento', 'Cobertura']],
+                body: tableData,
+                theme: 'grid',
+                headStyles: { fillColor: [99, 102, 241] },
+                margin: { top: 20 }
+            });
+        }
+
+        async function generatePersonalPDF(doc, yPosition, pageWidth, data) {
+            doc.setFontSize(16);
+            doc.setTextColor(40, 40, 40);
+            doc.text('Rendimiento del Personal', 20, yPosition);
+            yPosition += 20;
+            
+            // Tabla de personal con datos reales
+            const tableData = data.map(item => [
+                item.id,
+                item.nombre,
+                item.puesto,
+                item.estado,
+                item.certificaciones
+            ]);
+            
+            doc.autoTable({
+                startY: yPosition,
+                head: [['ID', 'Nombre', 'Puesto', 'Estado', 'Certificaciones']],
+                body: tableData,
+                theme: 'grid',
+                headStyles: { fillColor: [99, 102, 241] },
+                margin: { top: 20 }
+            });
+        }
+
+        function generateExcelReport(type, period) {
+            // Simular generación de Excel
+            showNotification(`✓ Reporte ${getReportTitle(type)} en Excel generado exitosamente`);
+        }
+
+        function viewReport(reportId) {
+            const report = generatedReports.find(r => r.id === reportId);
+            if (report) {
+                showNotification(`Visualizando reporte ${reportId}...`);
+                // En una aplicación real, esto abriría el reporte en un modal o nueva pestaña
+            }
+        }
+
+        function downloadReport(reportId) {
+            const report = generatedReports.find(r => r.id === reportId);
+            if (report) {
+                showNotification(`Descargando reporte ${reportId}...`);
+                // Regenerar el reporte para descargar
+                if (report.format === 'pdf') {
+                    generatePDFReport(report.type, report.period);
+                } else {
+                    generateExcelReport(report.type, report.period);
+                }
+            }
+        }
+
+        // Funciones auxiliares
+        function getReportTitle(type) {
+            const titles = {
+                'despachos': 'Despachos',
+                'financiero': 'Financiero',
+                'flota': 'Flota',
+                'clientes': 'Clientes',
+                'seguros': 'Seguros',
+                'personal': 'Personal'
+            };
+            return titles[type] || 'General';
+        }
+
+        function getPeriodText(period) {
+            const periods = {
+                'diario': 'Diario',
+                'semanal': 'Semanal',
+                'mensual': 'Mensual',
+                'trimestral': 'Trimestral',
+                'anual': 'Anual',
+                'personalizado': 'Personalizado'
+            };
+            return periods[period] || 'No especificado';
+        }
+
+        function showNotification(message, type = 'success') {
             const notification = document.createElement('div');
-            notification.textContent = `✓ ${message}`;
+            notification.textContent = message;
             notification.style.cssText = `
                 position: fixed;
                 top: 20px;
                 right: 20px;
-                background: linear-gradient(135deg, #6366f1, #06b6d4);
+                background: ${type === 'error' ? 'linear-gradient(135deg, #ef4444, #dc2626)' : 'linear-gradient(135deg, #6366f1, #06b6d4)'};
                 color: white;
                 padding: 1rem 2rem;
                 border-radius: 12px;
@@ -745,27 +1180,16 @@
             }, 3000);
         }
 
+        // Estilos para las animaciones de notificación
         const style = document.createElement('style');
         style.textContent = `
             @keyframes slideInRight {
-                from {
-                    transform: translateX(400px);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
+                from { transform: translateX(400px); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
             }
             @keyframes slideOutRight {
-                from {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-                to {
-                    transform: translateX(400px);
-                    opacity: 0;
-                }
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(400px); opacity: 0; }
             }
         `;
         document.head.appendChild(style);

@@ -313,24 +313,34 @@
             color: var(--success);
         }
 
-        .badge.pending {
-            background: rgba(245, 158, 11, 0.2);
-            color: var(--accent);
+        .badge.inactive {
+            background: rgba(148, 163, 184, 0.2);
+            color: var(--text-secondary);
         }
 
-        .badge.alert {
-            background: rgba(239, 68, 68, 0.2);
-            color: var(--danger);
-        }
-
-        .badge.warning {
-            background: rgba(245, 158, 11, 0.2);
-            color: var(--warning);
-        }
-
-        .badge.info {
+        .badge.empresa {
             background: rgba(59, 130, 246, 0.2);
             color: var(--info);
+        }
+
+        .badge.individual {
+            background: rgba(139, 92, 246, 0.2);
+            color: #a78bfa;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .error {
+            text-align: center;
+            padding: 2rem;
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 12px;
+            margin: 1rem 0;
         }
 
         .pagination {
@@ -383,6 +393,17 @@
 
         .action-btn:hover {
             background: var(--primary);
+            color: white;
+        }
+
+        .action-btn.delete {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        .action-btn.delete:hover {
+            background: var(--danger);
             color: white;
         }
 
@@ -493,6 +514,7 @@
         }
     </style>
 </head>
+<!-- clientes.html - Solo body y JS -->
 <body>
     <div class="bg-animation">
         <span></span>
@@ -524,17 +546,17 @@
 
         <div class="nav-menu">
             <div class="nav-item" onclick="window.location.href='{% url 'dashboard' %}'">📊 Dashboard</div>
-            <div class="nav-item" onclick="window.location.href='despachos.html'">📦 Despachos</div>
-            <div class="nav-item" onclick="window.location.href='rutas.html'">🗺️ Rutas</div>
-            <div class="nav-item" onclick="window.location.href='vehiculos.html'">🚛 Vehículos</div>
-            <div class="nav-item" onclick="window.location.href='aeronaves.html'">✈️ Aeronaves</div>
-            <div class="nav-item" onclick="window.location.href='conductores.html'">👨‍💼 Conductores</div>
-            <div class="nav-item" onclick="window.location.href='pilotos.html'">👨‍✈️ Pilotos</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'despachos' %}'">📦 Despachos</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'rutas' %}'">🗺️ Rutas</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'vehiculos' %}'">🚛 Vehículos</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'aeronaves' %}'">✈️ Aeronaves</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'conductores' %}'">👨‍💼 Conductores</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'pilotos' %}'">👨‍✈️ Pilotos</div>
             <div class="nav-item active" onclick="window.location.href='{% url 'clientes' %}'">👥 Clientes</div>
-            <div class="nav-item" onclick="window.location.href='cargas.html'">📦 Cargas</div>
-            <div class="nav-item" onclick="window.location.href='seguros.html'">🛡️ Seguros</div>
-            <div class="nav-item" onclick="window.location.href='reportes.html'">📈 Reportes</div>
-            <div class="nav-item" onclick="window.location.href='api.html'">🔗 API</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'cargas' %}'">📦 Cargas</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'seguros' %}'">🛡️ Seguros</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'reportes' %}'">📈 Reportes</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'api' %}'">🔗 API</div>
         </div>
 
         <div class="page-title">
@@ -544,25 +566,25 @@
 
         <div class="filters">
             <div class="filter-group">
-                <select class="filter-select">
+                <select class="filter-select" id="filter-type">
                     <option value="">Todos los tipos</option>
                     <option value="empresa">Empresa</option>
                     <option value="individual">Individual</option>
                 </select>
-                <select class="filter-select">
+                <select class="filter-select" id="filter-status">
                     <option value="">Todos los estados</option>
-                    <option value="activo">Activo</option>
-                    <option value="inactivo">Inactivo</option>
+                    <option value="active">Activo</option>
+                    <option value="inactive">Inactivo</option>
                 </select>
             </div>
-            <input type="text" class="search-input" placeholder="Buscar cliente...">
-            <button class="btn" onclick="showNewClienteModal()">➕ Nuevo Cliente</button>
+            <input type="text" class="search-input" id="search-input" placeholder="Buscar cliente...">
+            <button class="btn" id="new-client-btn">➕ Nuevo Cliente</button>
         </div>
 
         <div class="table-container">
             <div class="table-header">
                 <div class="table-title">Lista de Clientes</div>
-                <div style="color: var(--text-secondary); font-size: 0.9rem;">Total: 85 clientes</div>
+                <div id="client-count" style="color: var(--text-secondary); font-size: 0.9rem;">Cargando...</div>
             </div>
             <table class="table">
                 <thead>
@@ -577,84 +599,12 @@
                         <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="clients-table-body">
                     <tr>
-                        <td>CL-001</td>
-                        <td>TechCorp S.A.</td>
-                        <td>Empresa</td>
-                        <td>Juan Pérez</td>
-                        <td>+56 2 2345 6789</td>
-                        <td>juan.perez@techcorp.cl</td>
-                        <td><span class="badge active">Activo</span></td>
-                        <td>
-                            <button class="action-btn" onclick="viewCliente('CL-001')">Ver</button>
-                            <button class="action-btn" onclick="editCliente('CL-001')">Editar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>CL-002</td>
-                        <td>Global Imports</td>
-                        <td>Empresa</td>
-                        <td>María García</td>
-                        <td>+56 2 3456 7890</td>
-                        <td>maria.garcia@globalimports.cl</td>
-                        <td><span class="badge active">Activo</span></td>
-                        <td>
-                            <button class="action-btn" onclick="viewCliente('CL-002')">Ver</button>
-                            <button class="action-btn" onclick="editCliente('CL-002')">Editar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>CL-003</td>
-                        <td>ElectroParts</td>
-                        <td>Empresa</td>
-                        <td>Carlos López</td>
-                        <td>+56 2 4567 8901</td>
-                        <td>carlos.lopez@electroparts.cl</td>
-                        <td><span class="badge active">Activo</span></td>
-                        <td>
-                            <button class="action-btn" onclick="viewCliente('CL-003')">Ver</button>
-                            <button class="action-btn" onclick="editCliente('CL-003')">Editar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>CL-004</td>
-                        <td>AgroExport</td>
-                        <td>Empresa</td>
-                        <td>Ana Martínez</td>
-                        <td>+56 2 5678 9012</td>
-                        <td>ana.martinez@agroexport.cl</td>
-                        <td><span class="badge warning">Inactivo</span></td>
-                        <td>
-                            <button class="action-btn" onclick="viewCliente('CL-004')">Ver</button>
-                            <button class="action-btn" onclick="editCliente('CL-004')">Editar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>CL-005</td>
-                        <td>Minera Andina</td>
-                        <td>Empresa</td>
-                        <td>Roberto Silva</td>
-                        <td>+56 2 6789 0123</td>
-                        <td>roberto.silva@mineraandina.cl</td>
-                        <td><span class="badge active">Activo</span></td>
-                        <td>
-                            <button class="action-btn" onclick="viewCliente('CL-005')">Ver</button>
-                            <button class="action-btn" onclick="editCliente('CL-005')">Editar</button>
-                        </td>
+                        <td colspan="8" class="loading">Cargando datos de clientes desde la base de datos...</td>
                     </tr>
                 </tbody>
             </table>
-            <div class="pagination">
-                <div class="pagination-info">Mostrando 1-5 de 85 clientes</div>
-                <div class="pagination-controls">
-                    <button class="pagination-btn">Anterior</button>
-                    <button class="pagination-btn active">1</button>
-                    <button class="pagination-btn">2</button>
-                    <button class="pagination-btn">3</button>
-                    <button class="pagination-btn">Siguiente</button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -711,8 +661,8 @@
                     <div class="form-group">
                         <label class="form-label">Estado</label>
                         <select class="form-select" required>
-                            <option value="activo">Activo</option>
-                            <option value="inactivo">Inactivo</option>
+                            <option value="active">Activo</option>
+                            <option value="inactive">Inactivo</option>
                         </select>
                     </div>
                 </div>
@@ -737,18 +687,221 @@
     </div>
 
     <script>
-        function showModal(modalId) {
-            document.getElementById(modalId).style.display = 'block';
+        // Variable global para almacenar los clientes
+        let clientsData = [];
+
+        // Función para cargar clientes desde la base de datos
+        async function loadClientsFromDatabase() {
+            try {
+                showLoadingState();
+                
+                // Aquí se haría la llamada real a tu API o backend
+                const response = await fetch('/api/clientes/');
+                
+                if (!response.ok) {
+                    throw new Error('Error al cargar los clientes');
+                }
+                
+                clientsData = await response.json();
+                renderClientsTable(clientsData);
+                showNotification('Datos de clientes cargados correctamente');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showErrorState('Error al cargar los clientes: ' + error.message);
+            }
         }
 
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
+        // Función para mostrar estado de carga
+        function showLoadingState() {
+            const tableBody = document.getElementById('clients-table-body');
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="loading">Cargando datos de clientes desde la base de datos...</td>
+                </tr>
+            `;
+            document.getElementById('client-count').textContent = 'Cargando...';
         }
 
-        function showNewClienteModal() {
-            showModal('newClienteModal');
+        // Función para mostrar estado de error
+        function showErrorState(message) {
+            const tableBody = document.getElementById('clients-table-body');
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="8">
+                        <div class="error">
+                            ${message}
+                            <br>
+                            <button class="btn" onclick="loadClientsFromDatabase()" style="margin-top: 1rem;">
+                                Reintentar
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            document.getElementById('client-count').textContent = 'Error';
         }
 
+        // Función para renderizar la tabla de clientes
+        function renderClientsTable(clients) {
+            const tableBody = document.getElementById('clients-table-body');
+            const clientCount = document.getElementById('client-count');
+            
+            if (clients.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="loading">No se encontraron clientes en la base de datos</td>
+                    </tr>
+                `;
+                clientCount.textContent = 'Total: 0 clientes';
+                return;
+            }
+            
+            tableBody.innerHTML = '';
+            clientCount.textContent = `Total: ${clients.length} clientes`;
+            
+            clients.forEach(client => {
+                const row = document.createElement('tr');
+                
+                // USAR CAMPOS REALES DE LA BASE DE DATOS
+                // Estado basado en el campo 'activo' (booleano)
+                let statusClass = '';
+                let statusText = '';
+                
+                if (client.activo) {
+                    statusClass = 'active';
+                    statusText = 'Activo';
+                } else {
+                    statusClass = 'inactive';
+                    statusText = 'Inactivo';
+                }
+
+                // Tipo basado en la razón social (empresa) o nombre (individual)
+                let typeClass = '';
+                let typeText = 'Empresa'; // Por defecto empresa
+                
+                // Si el cliente tiene nombre y apellido en lugar de razón social, es individual
+                if (client.nombre && client.apellido) {
+                    typeClass = 'individual';
+                    typeText = 'Individual';
+                } else {
+                    typeClass = 'empresa';
+                    typeText = 'Empresa';
+                }
+                
+                row.innerHTML = `
+                    <td>${client.id || 'N/A'}</td>
+                    <td>${client.razon_social || client.nombre || 'N/A'}</td>
+                    <td><span class="badge ${typeClass}">${typeText}</span></td>
+                    <td>${client.persona_contacto || 'N/A'}</td>
+                    <td>${client.telefono || 'N/A'}</td>
+                    <td>${client.email || 'N/A'}</td>
+                    <td><span class="badge ${statusClass}">${statusText}</span></td>
+                    <td>
+                        <button class="action-btn" onclick="viewClient(${client.id})">Ver</button>
+                        <button class="action-btn" onclick="editClient(${client.id})">Editar</button>
+                        <button class="action-btn delete" onclick="deleteClient(${client.id})">Eliminar</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Función para filtrar clientes
+        function filterClients() {
+            const typeFilter = document.getElementById('filter-type').value;
+            const statusFilter = document.getElementById('filter-status').value;
+            const searchText = document.getElementById('search-input').value.toLowerCase();
+            
+            const filteredClients = clientsData.filter(client => {
+                // Determinar tipo de cliente
+                const isEmpresa = client.razon_social && !client.nombre;
+                const clientType = isEmpresa ? 'empresa' : 'individual';
+                
+                // Filtro por tipo
+                const matchesType = !typeFilter || clientType === typeFilter;
+                
+                // Filtro por estado (usando campo 'activo' real)
+                const matchesStatus = !statusFilter || 
+                    (statusFilter === 'active' && client.activo) ||
+                    (statusFilter === 'inactive' && !client.activo);
+                
+                // Filtro por búsqueda
+                const matchesSearch = !searchText || 
+                    (client.razon_social && client.razon_social.toLowerCase().includes(searchText)) ||
+                    (client.nombre && client.nombre.toLowerCase().includes(searchText)) ||
+                    (client.persona_contacto && client.persona_contacto.toLowerCase().includes(searchText)) ||
+                    (client.email && client.email.toLowerCase().includes(searchText)) ||
+                    (client.id && client.id.toString().includes(searchText));
+                
+                return matchesType && matchesStatus && matchesSearch;
+            });
+            
+            renderClientsTable(filteredClients);
+        }
+
+        // Funciones de acción para los clientes
+        async function viewClient(clientId) {
+            try {
+                const response = await fetch(`/api/clientes/${clientId}/`);
+                const clientDetails = await response.json();
+                
+                showNotification(`Viendo detalles del cliente ${clientId}`);
+                
+                // Mostrar detalles en modal
+                document.getElementById('viewClienteTitle').textContent = `Detalles del Cliente #${clientId}`;
+                document.getElementById('viewClienteContent').innerHTML = `
+                    <div style="display: grid; gap: 1rem;">
+                        <div><strong>ID:</strong> ${clientDetails.id || 'N/A'}</div>
+                        <div><strong>Razón Social/Nombre:</strong> ${clientDetails.razon_social || clientDetails.nombre || 'N/A'}</div>
+                        <div><strong>RUT:</strong> ${clientDetails.rut || 'N/A'}</div>
+                        <div><strong>Persona de Contacto:</strong> ${clientDetails.persona_contacto || 'N/A'}</div>
+                        <div><strong>Teléfono:</strong> ${clientDetails.telefono || 'N/A'}</div>
+                        <div><strong>Email:</strong> ${clientDetails.email || 'N/A'}</div>
+                        <div><strong>Dirección:</strong> ${clientDetails.direccion || 'N/A'}</div>
+                        <div><strong>Estado:</strong> ${clientDetails.activo ? 'Activo' : 'Inactivo'}</div>
+                    </div>
+                `;
+                showModal('viewClienteModal');
+                
+            } catch (error) {
+                console.error('Error al obtener detalles:', error);
+                showNotification('Error al cargar detalles del cliente');
+            }
+        }
+
+        async function editClient(clientId) {
+            showNotification(`Editando el cliente ${clientId}`);
+            // Redirigir a página de edición
+            window.location.href = `/clientes/${clientId}/editar/`;
+        }
+
+        async function deleteClient(clientId) {
+            if (confirm('¿Está seguro de que desea eliminar este cliente?')) {
+                try {
+                    const response = await fetch(`/api/clientes/${clientId}/`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCSRFToken()
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        await loadClientsFromDatabase();
+                        showNotification('Cliente eliminado correctamente');
+                    } else {
+                        throw new Error('Error al eliminar el cliente');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showNotification('Error al eliminar el cliente');
+                }
+            }
+        }
+
+        // Función para mostrar/ocultar campos según tipo de cliente
         function toggleClienteFields(tipo) {
             const empresaFields = document.getElementById('empresaFields');
             const individualFields = document.getElementById('individualFields');
@@ -765,43 +918,37 @@
             }
         }
 
-        function viewCliente(clienteId) {
-            const content = `
-                <div style="line-height: 1.6;">
-                    <p><strong>ID:</strong> ${clienteId}</p>
-                    <p><strong>Razón Social:</strong> TechCorp S.A.</p>
-                    <p><strong>RUT:</strong> 76.543.210-1</p>
-                    <p><strong>Persona de Contacto:</strong> Juan Pérez</p>
-                    <p><strong>Teléfono:</strong> +56 2 2345 6789</p>
-                    <p><strong>Email:</strong> juan.perez@techcorp.cl</p>
-                    <p><strong>Dirección:</strong> Av. Principal 123, Santiago</p>
-                    <p><strong>Estado:</strong> <span class="badge active">Activo</span></p>
-                    <div style="margin-top: 1.5rem;">
-                        <h4>Estadísticas</h4>
-                        <ul style="margin-top: 0.5rem;">
-                            <li>Despachos este mes: 15</li>
-                            <li>Total despachos: 245</li>
-                            <li>Facturación mensual: $1.2M</li>
-                            <li>Calificación: 4.7/5</li>
-                        </ul>
-                    </div>
-                </div>
-            `;
-            document.getElementById('viewClienteTitle').textContent = `Cliente ${clienteId}`;
-            document.getElementById('viewClienteContent').innerHTML = content;
-            showModal('viewClienteModal');
+        // Función auxiliar para obtener el token CSRF
+        function getCSRFToken() {
+            const name = 'csrftoken';
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
         }
 
-        function editCliente(clienteId) {
-            showNotification(`Editando cliente ${clienteId}...`);
+        // Modal Functions
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
         }
 
-        document.getElementById('newClienteForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            showNotification('Cliente creado exitosamente');
-            closeModal('newClienteModal');
-        });
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
 
+        function showNewClienteModal() {
+            showModal('newClienteModal');
+        }
+
+        // Notification System
         function showNotification(message) {
             const notification = document.createElement('div');
             notification.textContent = `✓ ${message}`;
@@ -827,6 +974,27 @@
             }, 3000);
         }
 
+        // Inicialización cuando se carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            loadClientsFromDatabase();
+            
+            document.getElementById('filter-type').addEventListener('change', filterClients);
+            document.getElementById('filter-status').addEventListener('change', filterClients);
+            document.getElementById('search-input').addEventListener('input', filterClients);
+            
+            document.getElementById('new-client-btn').addEventListener('click', showNewClienteModal);
+            
+            document.getElementById('newClienteForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                showNotification('Cliente creado exitosamente');
+                closeModal('newClienteModal');
+                // En una aplicación real, aquí se enviarían los datos al servidor
+            });
+            
+            console.log('👥 Módulo de Clientes cargado exitosamente');
+        });
+
+        // Estilos para las animaciones de notificaciones
         const style = document.createElement('style');
         style.textContent = `
             @keyframes slideInRight {
@@ -852,6 +1020,7 @@
         `;
         document.head.appendChild(style);
 
+        // Close modal when clicking outside
         window.onclick = function(event) {
             const modals = document.querySelectorAll('.modal');
             modals.forEach(modal => {
@@ -860,8 +1029,6 @@
                 }
             });
         }
-
-        console.log('👥 Módulo de Clientes cargado exitosamente');
     </script>
 </body>
 </html>

@@ -304,6 +304,11 @@
             color: var(--success);
         }
 
+        .badge.inactive {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
         .badge.terrestre {
             background: rgba(59, 130, 246, 0.2);
             color: var(--info);
@@ -329,6 +334,32 @@
         .action-btn:hover {
             background: var(--primary);
             color: white;
+        }
+
+        .action-btn.delete {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        .action-btn.delete:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .error {
+            text-align: center;
+            padding: 2rem;
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 12px;
+            margin: 1rem 0;
         }
 
         @media (max-width: 768px) {
@@ -410,26 +441,25 @@
         <!-- CONTENIDO ESPECÍFICO DE RUTAS -->
         <div class="filters">
             <div class="filter-group">
-                <select class="filter-select">
+                <select class="filter-select" id="filter-type">
                     <option value="">Todos los tipos</option>
                     <option value="terrestre">Terrestre</option>
                     <option value="aereo">Aéreo</option>
                 </select>
-                <select class="filter-select">
-                    <option value="">Todas las distancias</option>
-                    <option value="corta">Corta (< 100km)</option>
-                    <option value="media">Media (100-500km)</option>
-                    <option value="larga">Larga (> 500km)</option>
+                <select class="filter-select" id="filter-status">
+                    <option value="">Todos los estados</option>
+                    <option value="active">Activa</option>
+                    <option value="inactive">Inactiva</option>
                 </select>
             </div>
-            <input type="text" class="search-input" placeholder="Buscar ruta...">
-            <button class="btn">➕ Nueva Ruta</button>
+            <input type="text" class="search-input" id="search-input" placeholder="Buscar ruta...">
+            <button class="btn" id="new-route-btn">➕ Nueva Ruta</button>
         </div>
 
         <div class="table-container">
             <div class="table-header">
                 <div class="table-title">Lista de Rutas</div>
-                <div style="color: var(--text-secondary); font-size: 0.9rem;">Total: 48 rutas</div>
+                <div id="route-count" style="color: var(--text-secondary); font-size: 0.9rem;">Cargando...</div>
             </div>
             <table class="table">
                 <thead>
@@ -443,30 +473,9 @@
                         <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="routes-table-body">
                     <tr>
-                        <td>R-001</td>
-                        <td>Santiago - Valparaíso</td>
-                        <td><span class="badge terrestre">Terrestre</span></td>
-                        <td>115 km</td>
-                        <td>1h 45m</td>
-                        <td><span class="badge active">Activa</span></td>
-                        <td>
-                            <button class="action-btn">Ver</button>
-                            <button class="action-btn">Editar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>R-002</td>
-                        <td>Santiago - Bogotá</td>
-                        <td><span class="badge aereo">Aéreo</span></td>
-                        <td>4,250 km</td>
-                        <td>4h 30m</td>
-                        <td><span class="badge active">Activa</span></td>
-                        <td>
-                            <button class="action-btn">Ver</button>
-                            <button class="action-btn">Editar</button>
-                        </td>
+                        <td colspan="7" class="loading">Cargando datos de rutas desde la base de datos...</td>
                     </tr>
                 </tbody>
             </table>
@@ -474,6 +483,207 @@
     </div>
 
     <script>
+        // Variable global para almacenar las rutas
+        let routesData = [];
+
+        // Función para cargar rutas desde la base de datos
+        async function loadRoutesFromDatabase() {
+            try {
+                showLoadingState();
+                
+                // Aquí se haría la llamada real a tu API o backend
+                const response = await fetch('/api/rutas/');
+                
+                if (!response.ok) {
+                    throw new Error('Error al cargar las rutas');
+                }
+                
+                routesData = await response.json();
+                renderRoutesTable(routesData);
+                showNotification('Datos de rutas cargados correctamente');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showErrorState('Error al cargar las rutas: ' + error.message);
+            }
+        }
+
+        // Función para mostrar estado de carga
+        function showLoadingState() {
+            const tableBody = document.getElementById('routes-table-body');
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="loading">Cargando datos de rutas desde la base de datos...</td>
+                </tr>
+            `;
+            document.getElementById('route-count').textContent = 'Cargando...';
+        }
+
+        // Función para mostrar estado de error
+        function showErrorState(message) {
+            const tableBody = document.getElementById('routes-table-body');
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7">
+                        <div class="error">
+                            ${message}
+                            <br>
+                            <button class="btn" onclick="loadRoutesFromDatabase()" style="margin-top: 1rem;">
+                                Reintentar
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            document.getElementById('route-count').textContent = 'Error';
+        }
+
+        // Función para renderizar la tabla de rutas
+        function renderRoutesTable(routes) {
+            const tableBody = document.getElementById('routes-table-body');
+            const routeCount = document.getElementById('route-count');
+            
+            if (routes.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="loading">No se encontraron rutas en la base de datos</td>
+                    </tr>
+                `;
+                routeCount.textContent = 'Total: 0 rutas';
+                return;
+            }
+            
+            tableBody.innerHTML = '';
+            routeCount.textContent = `Total: ${routes.length} rutas`;
+            
+            routes.forEach(route => {
+                const row = document.createElement('tr');
+                
+                // Determinar la clase del badge según el tipo
+                const typeClass = route.tipo_transporte === 'TERRESTRE' ? 'terrestre' : 'aereo';
+                const statusClass = route.activo ? 'active' : 'inactive';
+                const statusText = route.activo ? 'Activa' : 'Inactiva';
+                
+                // Calcular tiempo estimado basado en distancia (simulación)
+                const tiempoEstimado = calcularTiempoEstimado(route.distancia_km, route.tipo_transporte);
+                
+                row.innerHTML = `
+                    <td>R-${route.id}</td>
+                    <td>${route.origen} - ${route.destino}</td>
+                    <td><span class="badge ${typeClass}">${route.tipo_transporte === 'TERRESTRE' ? 'Terrestre' : 'Aéreo'}</span></td>
+                    <td>${route.distancia_km} km</td>
+                    <td>${tiempoEstimado}</td>
+                    <td><span class="badge ${statusClass}">${statusText}</span></td>
+                    <td>
+                        <button class="action-btn" onclick="viewRoute(${route.id})">Ver</button>
+                        <button class="action-btn" onclick="editRoute(${route.id})">Editar</button>
+                        <button class="action-btn delete" onclick="deleteRoute(${route.id})">Eliminar</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Función para calcular tiempo estimado
+        function calcularTiempoEstimado(distancia, tipo) {
+            if (tipo === 'TERRESTRE') {
+                const horas = Math.ceil(distancia / 80); // 80 km/h promedio
+                return horas <= 1 ? '1 hora' : `${horas} horas`;
+            } else {
+                const horas = Math.ceil(distancia / 800); // 800 km/h promedio
+                return horas <= 1 ? '1 hora' : `${horas} horas`;
+            }
+        }
+
+        // Función para filtrar rutas
+        function filterRoutes() {
+            const typeFilter = document.getElementById('filter-type').value;
+            const statusFilter = document.getElementById('filter-status').value;
+            const searchText = document.getElementById('search-input').value.toLowerCase();
+            
+            const filteredRoutes = routesData.filter(route => {
+                const matchesType = !typeFilter || 
+                    (typeFilter === 'terrestre' && route.tipo_transporte === 'TERRESTRE') ||
+                    (typeFilter === 'aereo' && route.tipo_transporte === 'AEREO');
+                
+                const matchesStatus = !statusFilter || 
+                    (statusFilter === 'active' && route.activo) ||
+                    (statusFilter === 'inactive' && !route.activo);
+                
+                const matchesSearch = !searchText || 
+                    route.origen.toLowerCase().includes(searchText) || 
+                    route.destino.toLowerCase().includes(searchText) ||
+                    route.id.toString().includes(searchText);
+                
+                return matchesType && matchesStatus && matchesSearch;
+            });
+            
+            renderRoutesTable(filteredRoutes);
+        }
+
+        // Funciones de acción para las rutas
+        async function viewRoute(routeId) {
+            try {
+                const response = await fetch(`/api/rutas/${routeId}/`);
+                const routeDetails = await response.json();
+                
+                showNotification(`Viendo detalles de la ruta ${routeId}`);
+                console.log('Detalles de la ruta:', routeDetails);
+                
+            } catch (error) {
+                console.error('Error al obtener detalles:', error);
+                showNotification('Error al cargar detalles de la ruta');
+            }
+        }
+
+        async function editRoute(routeId) {
+            showNotification(`Editando la ruta ${routeId}`);
+            window.location.href = `/rutas/${routeId}/editar/`;
+        }
+
+        async function deleteRoute(routeId) {
+            if (confirm(`¿Está seguro de que desea eliminar la ruta ${routeId}?`)) {
+                try {
+                    const response = await fetch(`/api/rutas/${routeId}/`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCSRFToken()
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        await loadRoutesFromDatabase();
+                        showNotification(`Ruta ${routeId} eliminada correctamente`);
+                    } else {
+                        throw new Error('Error al eliminar la ruta');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showNotification('Error al eliminar la ruta');
+                }
+            }
+        }
+
+        // Función auxiliar para obtener el token CSRF
+        function getCSRFToken() {
+            const name = 'csrftoken';
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Función para mostrar notificaciones
         function showNotification(message) {
             const notification = document.createElement('div');
             notification.textContent = `✓ ${message}`;
@@ -499,6 +709,23 @@
             }, 3000);
         }
 
+        // Inicialización cuando se carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRoutesFromDatabase();
+            
+            document.getElementById('filter-type').addEventListener('change', filterRoutes);
+            document.getElementById('filter-status').addEventListener('change', filterRoutes);
+            document.getElementById('search-input').addEventListener('input', filterRoutes);
+            
+            document.getElementById('new-route-btn').addEventListener('click', function() {
+                showNotification('Creando nueva ruta');
+                window.location.href = '/rutas/nueva/';
+            });
+            
+            console.log('🗺️ Módulo de Rutas cargado exitosamente');
+        });
+
+        // Estilos para las animaciones de notificaciones
         const style = document.createElement('style');
         style.textContent = `
             @keyframes slideInRight {
@@ -523,8 +750,6 @@
             }
         `;
         document.head.appendChild(style);
-
-        console.log('🗺️ Módulo de Rutas cargado exitosamente');
     </script>
 </body>
 </html>

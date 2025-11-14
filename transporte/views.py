@@ -14,6 +14,16 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Sum, Q
 from django.utils import timezone
 from datetime import timedelta
+from django.http import HttpResponse
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib import colors
+from datetime import datetime
+import io
+from django.http import JsonResponse
+import json
 
 # Vistas para API
 class RutaViewSet(viewsets.ModelViewSet):
@@ -79,6 +89,181 @@ class RutaDeleteView(LoginRequiredMixin, DeleteView):
     template_name = 'transporte/ruta_confirm_delete.html'
     success_url = reverse_lazy('rutas')
 
+@login_required
+def generar_reporte_pdf(request):
+    """Genera un reporte en PDF con datos reales de la base de datos"""
+    
+    # Crear el buffer para el PDF
+    buffer = io.BytesIO()
+    
+    # Crear el documento PDF
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    elements = []
+    
+    # Obtener estilos
+    styles = getSampleStyleSheet()
+    
+    # Estilo personalizado para el título
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=16,
+        spaceAfter=30,
+        textColor=colors.HexColor('#6366f1'),
+        alignment=1  # Centrado
+    )
+    
+    # Información del usuario que genera el reporte
+    usuario = request.user
+    fecha_generacion = datetime.now().strftime("%d/%m/%Y %H:%M")
+    
+    # Título del reporte
+    elements.append(Paragraph("REPORTE DE LOGÍSTICA GLOBAL", title_style))
+    elements.append(Spacer(1, 20))
+    
+    # Información del generador
+    info_style = ParagraphStyle(
+        'InfoStyle',
+        parent=styles['Normal'],
+        fontSize=10,
+        textColor=colors.gray
+    )
+    
+    elements.append(Paragraph(f"<b>Generado por:</b> {usuario.get_full_name() or usuario.username}", info_style))
+    elements.append(Paragraph(f"<b>Fecha de generación:</b> {fecha_generacion}", info_style))
+    elements.append(Spacer(1, 30))
+    
+    # OBTENER DATOS REALES DE LA BASE DE DATOS
+    
+    # 1. Estadísticas generales
+    total_despachos = Despacho.objects.count()
+    despachos_pendientes = Despacho.objects.filter(estado='PENDIENTE').count()
+    despachos_en_ruta = Despacho.objects.filter(estado='EN_RUTA').count()
+    despachos_entregados = Despacho.objects.filter(estado='ENTREGADO').count()
+    
+    total_vehiculos = Vehiculo.objects.filter(activo=True).count()
+    total_aeronaves = Aeronave.objects.filter(activo=True).count()
+    total_clientes = Cliente.objects.filter(activo=True).count()
+    
+    # 2. Últimos despachos
+    ultimos_despachos = Despacho.objects.all().order_by('-fecha_despacho')[:10]
+    
+    # 3. Cargas por tipo
+    cargas_por_tipo = Carga.objects.values('tipo_carga').annotate(total=Count('id'))
+    
+    # SECCIÓN 1: ESTADÍSTICAS GENERALES
+    elements.append(Paragraph("ESTADÍSTICAS GENERALES", styles['Heading2']))
+    elements.append(Spacer(1, 15))
+    
+    # Tabla de estadísticas
+    stats_data = [
+        ['MÉTRICA', 'VALOR'],
+        ['Total Despachos', str(total_despachos)],
+        ['Despachos Pendientes', str(despachos_pendientes)],
+        ['Despachos en Ruta', str(despachos_en_ruta)],
+        ['Despachos Entregados', str(despachos_entregados)],
+        ['Vehículos Activos', str(total_vehiculos)],
+        ['Aeronaves Activas', str(total_aeronaves)],
+        ['Clientes Activos', str(total_clientes)]
+    ]
+    
+    stats_table = Table(stats_data, colWidths=[250, 100])
+    stats_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#6366f1')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f8fafc')),
+        ('GRID', (0, 0), (-1, -1), 1, colors.gray)
+    ]))
+    
+    elements.append(stats_table)
+    elements.append(Spacer(1, 30))
+    
+    # SECCIÓN 2: ÚLTIMOS DESPACHOS
+    elements.append(Paragraph("ÚLTIMOS DESPACHOS", styles['Heading2']))
+    elements.append(Spacer(1, 15))
+    
+    if ultimos_despachos:
+        despachos_data = [['ID', 'Cliente', 'Ruta', 'Estado', 'Fecha']]
+        
+        for despacho in ultimos_despachos:
+            despachos_data.append([
+                str(despacho.id),
+                despacho.cliente.razon_social[:20] + '...' if len(despacho.cliente.razon_social) > 20 else despacho.cliente.razon_social,
+                f"{despacho.ruta.origen} - {despacho.ruta.destino}",
+                despacho.estado,
+                despacho.fecha_despacho.strftime("%d/%m/%Y")
+            ])
+        
+        despachos_table = Table(despachos_data, colWidths=[50, 120, 150, 80, 80])
+        despachos_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#06b6d4')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f8fafc')),
+            ('GRID', (0, 0), (-1, -1), 1, colors.gray),
+            ('FONTSIZE', (0, 1), (-1, -1), 8)
+        ]))
+        
+        elements.append(despachos_table)
+    else:
+        elements.append(Paragraph("No hay despachos registrados.", styles['Normal']))
+    
+    elements.append(Spacer(1, 30))
+    
+    # SECCIÓN 3: CARGAS POR TIPO
+    elements.append(Paragraph("DISTRIBUCIÓN DE CARGAS POR TIPO", styles['Heading2']))
+    elements.append(Spacer(1, 15))
+    
+    if cargas_por_tipo:
+        cargas_data = [['Tipo de Carga', 'Cantidad']]
+        
+        for carga_tipo in cargas_por_tipo:
+            cargas_data.append([
+                carga_tipo['tipo_carga'],
+                str(carga_tipo['total'])
+            ])
+        
+        cargas_table = Table(cargas_data, colWidths=[300, 100])
+        cargas_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#10b981')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f8fafc')),
+            ('GRID', (0, 0), (-1, -1), 1, colors.gray)
+        ]))
+        
+        elements.append(cargas_table)
+    else:
+        elements.append(Paragraph("No hay cargas registradas.", styles['Normal']))
+    
+    # Pie de página
+    elements.append(Spacer(1, 50))
+    elements.append(Paragraph(
+        f"<i>Reporte generado automáticamente por el Sistema de Gestión de Transporte - {fecha_generacion}</i>", 
+        info_style
+    ))
+    
+    # Construir el PDF
+    doc.build(elements)
+    
+    # Obtener el valor del buffer
+    pdf = buffer.getvalue()
+    buffer.close()
+    
+    # Crear la respuesta HTTP
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="reporte_logistica.pdf"'
+    response.write(pdf)
+    
+    return response
+
 # Vistas de autenticación
 def login_view(request):
     if request.method == 'POST':
@@ -94,6 +279,131 @@ def login_view(request):
             messages.error(request, 'Usuario o contraseña incorrectos')
     
     return render(request, 'transporte/login.html')
+
+@login_required
+def obtener_datos_reporte(request):
+    """Vista para obtener datos reales de la base de datos para reportes"""
+    report_type = request.GET.get('type', 'despachos')
+    
+    try:
+        if report_type == 'despachos':
+            # Datos reales de despachos
+            despachos = Despacho.objects.select_related('cliente', 'ruta').all().order_by('-fecha_despacho')[:50]
+            data = []
+            for despacho in despachos:
+                data.append({
+                    'id': f"DESP-{despacho.id}",
+                    'cliente': despacho.cliente.razon_social,
+                    'fecha': despacho.fecha_despacho.strftime("%Y-%m-%d"),
+                    'estado': despacho.estado,
+                    'valor': float(despacho.costo_envio) if despacho.costo_envio else 0,
+                    'destino': f"{despacho.ruta.origen} - {despacho.ruta.destino}",
+                    'tipo_transporte': despacho.ruta.tipo_transporte
+                })
+                
+        elif report_type == 'financiero':
+            # Datos financieros reales
+            ingresos = Despacho.objects.aggregate(total=Sum('costo_envio'))['total'] or 0
+            total_despachos = Despacho.objects.count()
+            promedio_ingresos = ingresos / total_despachos if total_despachos > 0 else 0
+            
+            data = [
+                {'concepto': 'Ingresos por despachos', 'monto': float(ingresos), 'tipo': 'Ingreso'},
+                {'concepto': 'Total despachos realizados', 'monto': total_despachos, 'tipo': 'Metrica'},
+                {'concepto': 'Ingreso promedio por despacho', 'monto': float(promedio_ingresos), 'tipo': 'Metrica'},
+            ]
+            
+        elif report_type == 'flota':
+            # Datos reales de flota
+            vehiculos = Vehiculo.objects.filter(activo=True)
+            aeronaves = Aeronave.objects.filter(activo=True)
+            data = []
+            
+            for vehiculo in vehiculos:
+                data.append({
+                    'id': f"VH-{vehiculo.id}",
+                    'tipo': 'Vehículo',
+                    'modelo': vehiculo.modelo,
+                    'estado': 'Activo' if vehiculo.activo else 'Inactivo',
+                    'mantenimiento': 'Al día',  # Puedes agregar campo de mantenimiento al modelo
+                    'ubicacion': 'Depósito Central',
+                    'capacidad': f"{vehiculo.capacidad_kg} kg"
+                })
+                
+            for aeronave in aeronaves:
+                data.append({
+                    'id': f"AV-{aeronave.id}",
+                    'tipo': 'Aeronave',
+                    'modelo': aeronave.modelo,
+                    'estado': 'Activo' if aeronave.activo else 'Inactivo',
+                    'mantenimiento': 'Al día',
+                    'ubicacion': 'Aeropuerto',
+                    'capacidad': f"{aeronave.capacidad_kg} kg"
+                })
+                
+        elif report_type == 'clientes':
+            # Datos reales de clientes
+            clientes = Cliente.objects.filter(activo=True)
+            data = []
+            for cliente in clientes:
+                total_despachos = Despacho.objects.filter(cliente=cliente).count()
+                data.append({
+                    'id': f"CLI-{cliente.id}",
+                    'nombre': cliente.razon_social,
+                    'contacto': cliente.persona_contacto,
+                    'telefono': cliente.telefono,
+                    'email': cliente.email,
+                    'volumen': total_despachos,
+                    'direccion': cliente.direccion[:50] + '...' if len(cliente.direccion) > 50 else cliente.direccion
+                })
+                
+        elif report_type == 'seguros':
+            # Datos reales de seguros
+            seguros = Seguro.objects.all()
+            data = []
+            for seguro in seguros:
+                data.append({
+                    'poliza': seguro.numero_poliza,
+                    'tipo': seguro.tipo_seguro,
+                    'aseguradora': seguro.aseguradora,
+                    'vencimiento': seguro.vigencia_hasta.strftime("%Y-%m-%d"),
+                    'cobertura': float(seguro.cobertura) if seguro.cobertura else 0,
+                    'estado': seguro.estado
+                })
+                
+        elif report_type == 'personal':
+            # Datos reales de personal
+            conductores = Conductor.objects.filter(activo=True)
+            pilotos = Piloto.objects.filter(activo=True)
+            data = []
+            
+            for conductor in conductores:
+                data.append({
+                    'id': f"EMP-C-{conductor.id}",
+                    'nombre': conductor.nombre,
+                    'puesto': 'Conductor',
+                    'estado': 'Activo' if conductor.activo else 'Inactivo',
+                    'certificaciones': conductor.licencia,
+                    'contacto': conductor.telefono
+                })
+                
+            for piloto in pilotos:
+                data.append({
+                    'id': f"EMP-P-{piloto.id}",
+                    'nombre': piloto.nombre,
+                    'puesto': 'Piloto',
+                    'estado': 'Activo' if piloto.activo else 'Inactivo',
+                    'certificaciones': f"{piloto.certificacion} - {piloto.horas_vuelo} horas",
+                    'contacto': piloto.telefono
+                })
+        
+        else:
+            data = []
+            
+        return JsonResponse({'success': True, 'data': data})
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
 
 def register_view(request):
     if request.method == 'POST':
@@ -201,23 +511,50 @@ def dashboard(request):
 @login_required
 def crear_despacho(request):
     """Vista para crear un nuevo despacho"""
-    # Implementación básica - puedes expandir esto más tarde
     if request.method == 'POST':
-        # Lógica para crear despacho
-        messages.success(request, 'Despacho creado exitosamente')
-        return redirect('despachos')
-    else:
-        # Mostrar formulario para crear despacho
-        context = {
-            'rutas': Ruta.objects.all(),
-            'vehiculos': Vehiculo.objects.filter(activo=True),
-            'aeronaves': Aeronave.objects.filter(activo=True),
-            'conductores': Conductor.objects.filter(activo=True),
-            'pilotos': Piloto.objects.filter(activo=True),
-            'cargas': Carga.objects.all(),
-            'clientes': Cliente.objects.filter(activo=True),
-        }
-        return render(request, 'transporte/despacho_form.html', context)
+        try:
+            # Obtener datos del formulario
+            cliente_id = request.POST.get('cliente')
+            ruta_id = request.POST.get('ruta')
+            carga_id = request.POST.get('carga')
+            costo_envio = request.POST.get('costo_envio')
+            estado = request.POST.get('estado')
+            vehiculo_id = request.POST.get('vehiculo') or None
+            aeronave_id = request.POST.get('aeronave') or None
+            conductor_id = request.POST.get('conductor') or None
+            piloto_id = request.POST.get('piloto') or None
+            
+            # Crear el despacho
+            despacho = Despacho(
+                cliente_id=cliente_id,
+                ruta_id=ruta_id,
+                carga_id=carga_id,
+                costo_envio=costo_envio,
+                estado=estado,
+                vehiculo_id=vehiculo_id,
+                aeronave_id=aeronave_id,
+                conductor_id=conductor_id,
+                piloto_id=piloto_id
+            )
+            despacho.save()
+            
+            messages.success(request, 'Despacho creado exitosamente')
+            return redirect('despachos')
+            
+        except Exception as e:
+            messages.error(request, f'Error al crear el despacho: {str(e)}')
+    
+    # Mostrar formulario para crear despacho
+    context = {
+        'rutas': Ruta.objects.all(),
+        'vehiculos': Vehiculo.objects.filter(activo=True),
+        'aeronaves': Aeronave.objects.filter(activo=True),
+        'conductores': Conductor.objects.filter(activo=True),
+        'pilotos': Piloto.objects.filter(activo=True),
+        'cargas': Carga.objects.all(),
+        'clientes': Cliente.objects.filter(activo=True),
+    }
+    return render(request, 'transporte/despacho_form.html', context)
 
 @login_required
 def editar_despacho(request, pk):

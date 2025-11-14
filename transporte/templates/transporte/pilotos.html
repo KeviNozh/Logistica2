@@ -313,24 +313,49 @@
             color: var(--success);
         }
 
-        .badge.pending {
-            background: rgba(245, 158, 11, 0.2);
-            color: var(--accent);
-        }
-
-        .badge.alert {
-            background: rgba(239, 68, 68, 0.2);
-            color: var(--danger);
-        }
-
-        .badge.warning {
+        .badge.vacations {
             background: rgba(245, 158, 11, 0.2);
             color: var(--warning);
         }
 
-        .badge.info {
+        .badge.license {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .badge.inactive {
+            background: rgba(148, 163, 184, 0.2);
+            color: var(--text-secondary);
+        }
+
+        .badge.atpl {
             background: rgba(59, 130, 246, 0.2);
             color: var(--info);
+        }
+
+        .badge.cpl {
+            background: rgba(139, 92, 246, 0.2);
+            color: #a78bfa;
+        }
+
+        .badge.ppl {
+            background: rgba(14, 165, 233, 0.2);
+            color: #38bdf8;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .error {
+            text-align: center;
+            padding: 2rem;
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 12px;
+            margin: 1rem 0;
         }
 
         .pagination {
@@ -383,6 +408,17 @@
 
         .action-btn:hover {
             background: var(--primary);
+            color: white;
+        }
+
+        .action-btn.delete {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        .action-btn.delete:hover {
+            background: var(--danger);
             color: white;
         }
 
@@ -510,7 +546,7 @@
     <div class="container">
         <div class="header">
             <div class="logo">
-                <div class="logo-icon">🚚</div>
+                <div class="logo-icon">✈️</div>
                 <span>Logística Global</span>
             </div>
             <div class="user-info">
@@ -523,18 +559,18 @@
         </div>
 
         <div class="nav-menu">
-            <div class="nav-item" onclick="window.location.href='dashboard.html'">📊 Dashboard</div>
-            <div class="nav-item" onclick="window.location.href='despachos.html'">📦 Despachos</div>
-            <div class="nav-item" onclick="window.location.href='rutas.html'">🗺️ Rutas</div>
-            <div class="nav-item" onclick="window.location.href='vehiculos.html'">🚛 Vehículos</div>
-            <div class="nav-item" onclick="window.location.href='aeronaves.html'">✈️ Aeronaves</div>
-            <div class="nav-item" onclick="window.location.href='conductores.html'">👨‍💼 Conductores</div>
-            <div class="nav-item active" onclick="window.location.href='pilotos.html'">👨‍✈️ Pilotos</div>
-            <div class="nav-item" onclick="window.location.href='clientes.html'">👥 Clientes</div>
-            <div class="nav-item" onclick="window.location.href='cargas.html'">📦 Cargas</div>
-            <div class="nav-item" onclick="window.location.href='seguros.html'">🛡️ Seguros</div>
-            <div class="nav-item" onclick="window.location.href='reportes.html'">📈 Reportes</div>
-            <div class="nav-item" onclick="window.location.href='api.html'">🔗 API</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'dashboard' %}'">📊 Dashboard</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'despachos' %}'">📦 Despachos</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'rutas' %}'">🗺️ Rutas</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'vehiculos' %}'">🚛 Vehículos</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'aeronaves' %}'">✈️ Aeronaves</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'conductores' %}'">👨‍💼 Conductores</div>
+            <div class="nav-item active" onclick="window.location.href='{% url 'pilotos' %}'">👨‍✈️ Pilotos</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'clientes' %}'">👥 Clientes</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'cargas' %}'">📦 Cargas</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'seguros' %}'">🛡️ Seguros</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'reportes' %}'">📈 Reportes</div>
+            <div class="nav-item" onclick="window.location.href='{% url 'api' %}'">🔗 API</div>
         </div>
 
         <div class="page-title">
@@ -544,119 +580,45 @@
 
         <div class="filters">
             <div class="filter-group">
-                <select class="filter-select">
+                <select class="filter-select" id="filter-status">
                     <option value="">Todos los estados</option>
-                    <option value="activo">Activo</option>
-                    <option value="vacaciones">Vacaciones</option>
-                    <option value="licencia">Licencia</option>
-                    <option value="inactivo">Inactivo</option>
+                    <option value="active">Activo</option>
+                    <option value="inactive">Inactivo</option>
                 </select>
-                <select class="filter-select">
+                <select class="filter-select" id="filter-license">
                     <option value="">Todos los tipos</option>
-                    <option value="comercial">Comercial</option>
-                    <option value="carga">Carga</option>
+                    <option value="ATPL">ATPL</option>
+                    <option value="CPL">CPL</option>
+                    <option value="PPL">PPL</option>
                 </select>
             </div>
-            <input type="text" class="search-input" placeholder="Buscar piloto...">
-            <button class="btn" onclick="showNewPilotoModal()">➕ Nuevo Piloto</button>
+            <input type="text" class="search-input" id="search-input" placeholder="Buscar piloto...">
+            <button class="btn" id="new-pilot-btn">➕ Nuevo Piloto</button>
         </div>
 
         <div class="table-container">
             <div class="table-header">
                 <div class="table-title">Lista de Pilotos</div>
-                <div style="color: var(--text-secondary); font-size: 0.9rem;">Total: 12 pilotos</div>
+                <div id="pilot-count" style="color: var(--text-secondary); font-size: 0.9rem;">Cargando...</div>
             </div>
             <table class="table">
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>Nombre</th>
-                        <th>Licencia</th>
-                        <th>Aeronave Asignada</th>
+                        <th>Certificación</th>
+                        <th>Horas de Vuelo</th>
                         <th>Teléfono</th>
                         <th>Estado</th>
-                        <th>Vence Licencia</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="pilots-table-body">
                     <tr>
-                        <td>P-001</td>
-                        <td>Roberto Silva</td>
-                        <td>ATPL</td>
-                        <td>CC-AW01</td>
-                        <td>+56 9 1234 5678</td>
-                        <td><span class="badge active">Activo</span></td>
-                        <td>15/06/2024</td>
-                        <td>
-                            <button class="action-btn" onclick="viewPiloto('P-001')">Ver</button>
-                            <button class="action-btn" onclick="editPiloto('P-001')">Editar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>P-002</td>
-                        <td>María González</td>
-                        <td>ATPL</td>
-                        <td>CC-AW02</td>
-                        <td>+56 9 2345 6789</td>
-                        <td><span class="badge active">Activo</span></td>
-                        <td>20/07/2024</td>
-                        <td>
-                            <button class="action-btn" onclick="viewPiloto('P-002')">Ver</button>
-                            <button class="action-btn" onclick="editPiloto('P-002')">Editar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>P-003</td>
-                        <td>Carlos Méndez</td>
-                        <td>ATPL</td>
-                        <td>CC-AW03</td>
-                        <td>+56 9 3456 7890</td>
-                        <td><span class="badge warning">Vacaciones</span></td>
-                        <td>10/05/2024</td>
-                        <td>
-                            <button class="action-btn" onclick="viewPiloto('P-003')">Ver</button>
-                            <button class="action-btn" onclick="editPiloto('P-003')">Editar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>P-004</td>
-                        <td>Laura Rodríguez</td>
-                        <td>CPL</td>
-                        <td>CC-AW04</td>
-                        <td>+56 9 4567 8901</td>
-                        <td><span class="badge alert">Licencia</span></td>
-                        <td>25/12/2023</td>
-                        <td>
-                            <button class="action-btn" onclick="viewPiloto('P-004')">Ver</button>
-                            <button class="action-btn" onclick="editPiloto('P-004')">Editar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>P-005</td>
-                        <td>Javier López</td>
-                        <td>ATPL</td>
-                        <td>CC-AW05</td>
-                        <td>+56 9 5678 9012</td>
-                        <td><span class="badge active">Activo</span></td>
-                        <td>30/08/2024</td>
-                        <td>
-                            <button class="action-btn" onclick="viewPiloto('P-005')">Ver</button>
-                            <button class="action-btn" onclick="editPiloto('P-005')">Editar</button>
-                        </td>
+                        <td colspan="7" class="loading">Cargando datos de pilotos desde la base de datos...</td>
                     </tr>
                 </tbody>
             </table>
-            <div class="pagination">
-                <div class="pagination-info">Mostrando 1-5 de 12 pilotos</div>
-                <div class="pagination-controls">
-                    <button class="pagination-btn">Anterior</button>
-                    <button class="pagination-btn active">1</button>
-                    <button class="pagination-btn">2</button>
-                    <button class="pagination-btn">3</button>
-                    <button class="pagination-btn">Siguiente</button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -665,64 +627,39 @@
             <span class="close-modal" onclick="closeModal('newPilotoModal')">&times;</span>
             <h3>Nuevo Piloto</h3>
             <form id="newPilotoForm">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Nombre</label>
-                        <input type="text" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Apellido</label>
-                        <input type="text" class="form-input" required>
-                    </div>
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="form-label">Nombre Completo</label>
+                    <input type="text" class="form-input" id="nombre" name="nombre" required>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">Licencia</label>
-                        <select class="form-select" required>
-                            <option value="">Seleccionar licencia</option>
-                            <option value="ATPL">ATPL</option>
-                            <option value="CPL">CPL</option>
-                            <option value="PPL">PPL</option>
-                        </select>
+                        <label class="form-label">RUT</label>
+                        <input type="text" class="form-input" id="rut" name="rut" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Vence Licencia</label>
-                        <input type="date" class="form-input" required>
+                        <label class="form-label">Certificación</label>
+                        <input type="text" class="form-input" id="certificacion" name="certificacion" required>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Teléfono</label>
-                        <input type="tel" class="form-input" required>
+                        <input type="tel" class="form-input" id="telefono" name="telefono" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Email</label>
-                        <input type="email" class="form-input" required>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Estado</label>
-                        <select class="form-select" required>
-                            <option value="activo">Activo</option>
-                            <option value="vacaciones">Vacaciones</option>
-                            <option value="licencia">Licencia</option>
-                            <option value="inactivo">Inactivo</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Aeronave Asignada</label>
-                        <select class="form-select">
-                            <option value="">Sin asignar</option>
-                            <option value="CC-AW01">CC-AW01</option>
-                            <option value="CC-AW02">CC-AW02</option>
-                            <option value="CC-AW03">CC-AW03</option>
-                        </select>
+                        <input type="email" class="form-input" id="email" name="email" required>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Horas de Vuelo</label>
-                    <input type="number" class="form-input" placeholder="Total horas de vuelo" required>
+                    <input type="number" class="form-input" id="horas_vuelo" name="horas_vuelo" value="0" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" id="activo" name="activo" checked> Activo
+                    </label>
                 </div>
                 <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('newPilotoModal')">Cancelar</button>
@@ -741,64 +678,285 @@
     </div>
 
     <script>
+        // Variable global para almacenar los pilotos
+        let pilotsData = [];
+
+        // Función para cargar pilotos desde la base de datos
+        async function loadPilotsFromDatabase() {
+            try {
+                showLoadingState();
+                
+                // Llamada real a la API de Django
+                const response = await fetch('/api/pilotos/');
+                
+                if (!response.ok) {
+                    throw new Error('Error al cargar los pilotos');
+                }
+                
+                pilotsData = await response.json();
+                renderPilotsTable(pilotsData);
+                showNotification('Datos de pilotos cargados correctamente');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showErrorState('Error al cargar los pilotos: ' + error.message);
+            }
+        }
+
+        // Función para mostrar estado de carga
+        function showLoadingState() {
+            const tableBody = document.getElementById('pilots-table-body');
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="loading">Cargando datos de pilotos desde la base de datos...</td>
+                </tr>
+            `;
+            document.getElementById('pilot-count').textContent = 'Cargando...';
+        }
+
+        // Función para mostrar estado de error
+        function showErrorState(message) {
+            const tableBody = document.getElementById('pilots-table-body');
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7">
+                        <div class="error">
+                            ${message}
+                            <br>
+                            <button class="btn" onclick="loadPilotsFromDatabase()" style="margin-top: 1rem;">
+                                Reintentar
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            document.getElementById('pilot-count').textContent = 'Error';
+        }
+
+        // Función para renderizar la tabla de pilotos
+        function renderPilotsTable(pilots) {
+            const tableBody = document.getElementById('pilots-table-body');
+            const pilotCount = document.getElementById('pilot-count');
+            
+            if (pilots.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="loading">No se encontraron pilotos en la base de datos</td>
+                    </tr>
+                `;
+                pilotCount.textContent = 'Total: 0 pilotos';
+                return;
+            }
+            
+            tableBody.innerHTML = '';
+            pilotCount.textContent = `Total: ${pilots.length} pilotos`;
+            
+            pilots.forEach(pilot => {
+                const row = document.createElement('tr');
+                
+                // USAR CAMPOS REALES DE LA BASE DE DATOS
+                // Estado basado en el campo 'activo' (booleano)
+                let statusClass = '';
+                let statusText = '';
+                
+                if (pilot.activo) {
+                    statusClass = 'active';
+                    statusText = 'Activo';
+                } else {
+                    statusClass = 'inactive';
+                    statusText = 'Inactivo';
+                }
+
+                // Certificación basada en el campo 'certificacion'
+                let licenseClass = '';
+                let licenseText = pilot.certificacion || 'N/A';
+                
+                // Mapear certificaciones a clases CSS existentes
+                if (licenseText.includes('ATPL')) {
+                    licenseClass = 'atpl';
+                } else if (licenseText.includes('CPL')) {
+                    licenseClass = 'cpl';
+                } else if (licenseText.includes('PPL')) {
+                    licenseClass = 'ppl';
+                } else {
+                    licenseClass = 'info';
+                }
+                
+                row.innerHTML = `
+                    <td>${pilot.id || 'N/A'}</td>
+                    <td>${pilot.nombre || 'N/A'}</td>
+                    <td><span class="badge ${licenseClass}">${licenseText}</span></td>
+                    <td>${pilot.horas_vuelo || 0} horas</td>
+                    <td>${pilot.telefono || 'N/A'}</td>
+                    <td><span class="badge ${statusClass}">${statusText}</span></td>
+                    <td>
+                        <button class="action-btn" onclick="viewPilot(${pilot.id})">Ver</button>
+                        <button class="action-btn" onclick="editPilot(${pilot.id})">Editar</button>
+                        <button class="action-btn delete" onclick="deletePilot(${pilot.id})">Eliminar</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Función para filtrar pilotos
+        function filterPilots() {
+            const statusFilter = document.getElementById('filter-status').value;
+            const licenseFilter = document.getElementById('filter-license').value;
+            const searchText = document.getElementById('search-input').value.toLowerCase();
+            
+            const filteredPilots = pilotsData.filter(pilot => {
+                // Filtro por estado (usando campo 'activo' real)
+                const matchesStatus = !statusFilter || 
+                    (statusFilter === 'active' && pilot.activo) ||
+                    (statusFilter === 'inactive' && !pilot.activo);
+                
+                // Filtro por certificación (usando campo 'certificacion' real)
+                const matchesLicense = !licenseFilter || 
+                    (pilot.certificacion && pilot.certificacion.includes(licenseFilter));
+                
+                // Filtro por búsqueda
+                const matchesSearch = !searchText || 
+                    (pilot.nombre && pilot.nombre.toLowerCase().includes(searchText)) ||
+                    (pilot.certificacion && pilot.certificacion.toLowerCase().includes(searchText)) ||
+                    (pilot.telefono && pilot.telefono.toLowerCase().includes(searchText)) ||
+                    (pilot.id && pilot.id.toString().includes(searchText));
+                
+                return matchesStatus && matchesLicense && matchesSearch;
+            });
+            
+            renderPilotsTable(filteredPilots);
+        }
+
+        // Función para crear un nuevo piloto
+        async function createPilot(pilotData) {
+            try {
+                const response = await fetch('/api/pilotos/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken()
+                    },
+                    body: JSON.stringify(pilotData)
+                });
+                
+                if (response.ok) {
+                    const newPilot = await response.json();
+                    return newPilot;
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Error al crear el piloto');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                throw error;
+            }
+        }
+
+        // Funciones de acción para los pilotos
+        async function viewPilot(pilotId) {
+            try {
+                const response = await fetch(`/api/pilotos/${pilotId}/`);
+                const pilotDetails = await response.json();
+                
+                showNotification(`Viendo detalles del piloto ${pilotId}`);
+                
+                // Mostrar detalles en modal
+                document.getElementById('viewPilotoTitle').textContent = `Detalles del Piloto #${pilotId}`;
+                document.getElementById('viewPilotoContent').innerHTML = `
+                    <div style="display: grid; gap: 1rem;">
+                        <div><strong>ID:</strong> ${pilotDetails.id || 'N/A'}</div>
+                        <div><strong>Nombre:</strong> ${pilotDetails.nombre || 'N/A'}</div>
+                        <div><strong>RUT:</strong> ${pilotDetails.rut || 'N/A'}</div>
+                        <div><strong>Certificación:</strong> ${pilotDetails.certificacion || 'N/A'}</div>
+                        <div><strong>Teléfono:</strong> ${pilotDetails.telefono || 'N/A'}</div>
+                        <div><strong>Email:</strong> ${pilotDetails.email || 'N/A'}</div>
+                        <div><strong>Horas de Vuelo:</strong> ${pilotDetails.horas_vuelo || 0} horas</div>
+                        <div><strong>Estado:</strong> ${pilotDetails.activo ? 'Activo' : 'Inactivo'}</div>
+                    </div>
+                `;
+                showModal('viewPilotoModal');
+                
+            } catch (error) {
+                console.error('Error al obtener detalles:', error);
+                showNotification('Error al cargar detalles del piloto');
+            }
+        }
+
+        async function editPilot(pilotId) {
+            showNotification(`Editando el piloto ${pilotId}`);
+            // Redirigir a página de edición
+            window.location.href = `/pilotos/${pilotId}/editar/`;
+        }
+
+        async function deletePilot(pilotId) {
+            if (confirm('¿Está seguro de que desea eliminar este piloto?')) {
+                try {
+                    const response = await fetch(`/api/pilotos/${pilotId}/`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCSRFToken()
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        await loadPilotsFromDatabase();
+                        showNotification('Piloto eliminado correctamente');
+                    } else {
+                        throw new Error('Error al eliminar el piloto');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showNotification('Error al eliminar el piloto');
+                }
+            }
+        }
+
+        // Función auxiliar para obtener el token CSRF
+        function getCSRFToken() {
+            const name = 'csrftoken';
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Modal Functions
         function showModal(modalId) {
             document.getElementById(modalId).style.display = 'block';
         }
 
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
+            // Limpiar formulario al cerrar
+            if (modalId === 'newPilotoModal') {
+                document.getElementById('newPilotoForm').reset();
+            }
         }
 
         function showNewPilotoModal() {
             showModal('newPilotoModal');
         }
 
-        function viewPiloto(pilotoId) {
-            const content = `
-                <div style="line-height: 1.6;">
-                    <p><strong>ID:</strong> ${pilotoId}</p>
-                    <p><strong>Nombre:</strong> Roberto Silva</p>
-                    <p><strong>Licencia:</strong> ATPL</p>
-                    <p><strong>Vence Licencia:</strong> 15/06/2024</p>
-                    <p><strong>Teléfono:</strong> +56 9 1234 5678</p>
-                    <p><strong>Email:</strong> roberto.silva@empresa.com</p>
-                    <p><strong>Aeronave Asignada:</strong> CC-AW01 (Boeing 737-800F)</p>
-                    <p><strong>Estado:</strong> <span class="badge active">Activo</span></p>
-                    <p><strong>Horas de Vuelo:</strong> 4,250 hrs</p>
-                    <div style="margin-top: 1.5rem;">
-                        <h4>Estadísticas</h4>
-                        <ul style="margin-top: 0.5rem;">
-                            <li>Vuelos este mes: 8</li>
-                            <li>Horas voladas: 45 hrs</li>
-                            <li>Calificación promedio: 4.9/5</li>
-                            <li>Incidentes: 0</li>
-                        </ul>
-                    </div>
-                </div>
-            `;
-            document.getElementById('viewPilotoTitle').textContent = `Piloto ${pilotoId}`;
-            document.getElementById('viewPilotoContent').innerHTML = content;
-            showModal('viewPilotoModal');
-        }
-
-        function editPiloto(pilotoId) {
-            showNotification(`Editando piloto ${pilotoId}...`);
-        }
-
-        document.getElementById('newPilotoForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            showNotification('Piloto creado exitosamente');
-            closeModal('newPilotoModal');
-        });
-
-        function showNotification(message) {
+        // Notification System
+        function showNotification(message, type = 'success') {
             const notification = document.createElement('div');
-            notification.textContent = `✓ ${message}`;
+            notification.textContent = type === 'success' ? `✓ ${message}` : `✗ ${message}`;
             notification.style.cssText = `
                 position: fixed;
                 top: 20px;
                 right: 20px;
-                background: linear-gradient(135deg, #6366f1, #06b6d4);
+                background: ${type === 'success' ? 'linear-gradient(135deg, #6366f1, #06b6d4)' : 'linear-gradient(135deg, #ef4444, #dc2626)'};
                 color: white;
                 padding: 1rem 2rem;
                 border-radius: 12px;
@@ -816,6 +974,52 @@
             }, 3000);
         }
 
+        // Inicialización cuando se carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPilotsFromDatabase();
+            
+            document.getElementById('filter-status').addEventListener('change', filterPilots);
+            document.getElementById('filter-license').addEventListener('change', filterPilots);
+            document.getElementById('search-input').addEventListener('input', filterPilots);
+            
+            document.getElementById('new-pilot-btn').addEventListener('click', showNewPilotoModal);
+            
+            // Configurar formulario de nuevo piloto
+            document.getElementById('newPilotoForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                try {
+                    // Recoger datos del formulario
+                    const pilotData = {
+                        nombre: document.getElementById('nombre').value,
+                        rut: document.getElementById('rut').value,
+                        certificacion: document.getElementById('certificacion').value,
+                        telefono: document.getElementById('telefono').value,
+                        email: document.getElementById('email').value,
+                        horas_vuelo: parseInt(document.getElementById('horas_vuelo').value),
+                        activo: document.getElementById('activo').checked
+                    };
+                    
+                    // Crear piloto en la base de datos
+                    const newPilot = await createPilot(pilotData);
+                    
+                    // Cerrar modal y mostrar mensaje
+                    closeModal('newPilotoModal');
+                    showNotification('Piloto creado exitosamente');
+                    
+                    // Recargar la tabla
+                    await loadPilotsFromDatabase();
+                    
+                } catch (error) {
+                    console.error('Error al crear piloto:', error);
+                    showNotification('Error al crear el piloto: ' + error.message, 'error');
+                }
+            });
+            
+            console.log('👨‍✈️ Módulo de Pilotos cargado exitosamente');
+        });
+
+        // Estilos para las animaciones de notificaciones
         const style = document.createElement('style');
         style.textContent = `
             @keyframes slideInRight {
@@ -841,16 +1045,19 @@
         `;
         document.head.appendChild(style);
 
+        // Close modal when clicking outside
         window.onclick = function(event) {
             const modals = document.querySelectorAll('.modal');
             modals.forEach(modal => {
                 if (event.target === modal) {
                     modal.style.display = 'none';
+                    // Limpiar formulario al cerrar
+                    if (modal.id === 'newPilotoModal') {
+                        document.getElementById('newPilotoForm').reset();
+                    }
                 }
             });
         }
-
-        console.log('👨‍✈️ Módulo de Pilotos cargado exitosamente');
     </script>
 </body>
 </html>
